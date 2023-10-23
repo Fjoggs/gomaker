@@ -1,0 +1,8 @@
+// entity 1
+{
+"classname" "misc_model"
+"origin" "-924 -4 536"
+"model" "maps/models/fjo3tourney6_lamp-2_10.ase"
+"angles" "-0 0 -180"
+"_remap" "*;textures/cpm30_b1/base_stone3_moss"
+}
