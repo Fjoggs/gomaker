@@ -31,37 +31,61 @@ func TestParseEntity(t *testing.T) {
 	}{
 		{[]string{
 			"{",
-			"classname misc_model",
-			"origin -924 -4 536",
-			"model resources/test-model.ase",
-			"angles -0 0 -180",
+			`"classname" "misc_model"`,
+			`"origin" "-924 -4 536"`,
+			`"model" "resources/test-model.ase"`,
+			`"angles" "-0 0 -180"`,
 			"}",
 		}, []string{"testmap/test_texture"}},
 		{[]string{
 			"{",
-			"classname misc_model",
-			"origin -924 -4 536",
-			"model resources/test-model-2.ase",
-			"angles -0 0 -180",
+			`"classname" "misc_model"`,
+			`"origin" "-924 -4 536"`,
+			`"model" "resources/test-model-2.ase"`,
+			`"angles" "-0 0 -180"`,
 			"}",
 		}, []string{"texture_test/concrete_tile", "texture_test/texture-2"}},
 		{[]string{
 			"{",
-			"classname misc_model",
-			"model resources/test-material.obj",
+			`"classname" "misc_model"`,
+			`"model" "resources/test-material.obj"`,
 			"}",
 		}, []string{"testmap/test_texture"}},
 		{[]string{
 			"{",
-			"classname misc_model",
-			"model resources/test-material-2.obj",
+			`"classname" "misc_model"`,
+			`"model" "resources/test-material-2.obj"`,
 			"}",
 		}, []string{"texture_test/concrete_tile"}},
+		{[]string{
+			"{",
+			`"classname" "misc_model"`,
+			`"model" "resources/test-material-2.obj"`,
+			`"_remap" ":*;textures/test_texture/texture-2"`,
+			"}",
+		}, []string{"test_texture/texture-2"}},
+		{[]string{
+			"{",
+			`"classname" "misc_model"`,
+			`"origin" "-924 -4 536"`,
+			`"model" "maps/models/test-model.ase"`,
+			`"angles" "-0 0 -180"`,
+			`"_remap" "*;textures/testmap/test_texture"`,
+			"}",
+		}, []string{"testmap/test_texture"}},
+		{[]string{
+			"{",
+			`"classname" "worldspawn"`,
+			`"message" "Test map"`,
+			`"ambient" "10"`,
+			"}",
+		}, []string{}},
+		{[]string{"{", "}"}, []string{}},
 	}
 	for _, test := range tests {
 		actual := parseEntity(test.input)
 		if !isEqual(actual, test.expected) {
-			t.Errorf("Expected %s got %s for %v", test.expected, actual, test)
+			t.Errorf("Expected %s got %s for %v", test.expected, actual, test.input)
 		}
 	}
 
@@ -72,9 +96,10 @@ func TestModelPath(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"model resources/test-model.ase", "resources/test-model.ase"},
-		{"model resources/test-model-2.ase", "resources/test-model-2.ase"},
-		{"model resources/test-model-3.obj", "resources/test-model-3.obj"},
+		{`"model" "resources/test-model.ase"`, "resources/test-model.ase"},
+		{`"model" "resources/test-model-2.ase"`, "resources/test-model-2.ase"},
+		{`"model" "resources/test-model-3.obj"`, "resources/test-model-3.obj"},
+		{`"model" "maps/models/test-model.ase"`, "maps/models/test-model.ase"},
 	}
 	for _, test := range tests {
 		actual := modelPath(test.input)
@@ -89,10 +114,10 @@ func TestRemapTexture(t *testing.T) {
 		expected string
 	}{
 		{"{", ""},
-		{"classname misc_model", ""},
-		{"origin -924 -4 536", ""},
-		{"angles -0 0 -180", ""},
-		{"_remap *;textures/testmap/test_texture", "testmap/test_texture"},
+		{`"classname" "misc_model"`, ""},
+		{`"origin" "-924 -4 536"`, ""},
+		{`"angles" "-0 0 -180"`, ""},
+		{`"_remap" "*;textures/testmap/test_texture"`, "testmap/test_texture"},
 		{"}", ""},
 	}
 	for _, test := range tests {

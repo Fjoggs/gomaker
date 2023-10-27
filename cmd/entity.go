@@ -2,7 +2,6 @@ package gomaker
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -23,20 +22,23 @@ func parseEntity(lines []string) []string {
 	textures := []string{}
 	modelPathLine := ""
 	hasRemap := false
+	isModel := false
 	for _, line := range lines {
+		if !isModel {
+			// Only overwrite variable if we haven't determined if it's a model yet
+			isModel = strings.Contains(line, "misc_model")
+		}
 		if strings.Contains(line, "_remap") {
 			hasRemap = true
 			textures = append(textures, remapTexture(line))
 			return textures
 		} else if strings.Contains(line, ".ase") {
 			modelPathLine = line
-			fmt.Println("line", line)
 		} else if strings.Contains(line, ".obj") {
-			fmt.Println("line", line)
 			modelPathLine = strings.Replace(line, ".obj", ".mtl", 1)
 		}
 	}
-	if !hasRemap {
+	if !hasRemap && isModel {
 		modelPath := modelPath(modelPathLine)
 		textures = parseModel(modelPath)
 	}
@@ -46,6 +48,7 @@ func parseEntity(lines []string) []string {
 func modelPath(line string) string {
 	_, after, didCut := strings.Cut(line, "model")
 	if didCut {
+		after = strings.Replace(after, `"`, "", 3)
 		return strings.TrimSpace(after)
 	}
 	return ""
@@ -56,7 +59,7 @@ func parseModel(modelPath string) []string {
 	file, err := os.Open(modelPath)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed opening file %v with path %s, error %s", file, modelPath, err)
 	}
 	defer file.Close()
 
@@ -90,7 +93,7 @@ func objTexture(line string) string {
 		if didCut {
 			texture := strings.ReplaceAll(after, "\\", "/")
 			texture = strings.Replace(texture, `"`, "", 1)
-			return isTexture(texture)
+			return getMaterial(texture)
 		}
 	}
 	return ""
@@ -105,12 +108,12 @@ func aseTexture(line string) string {
 		if didCut {
 			texture := strings.ReplaceAll(after, "\\", "/")
 			texture = strings.Replace(texture, `"`, "", 1)
-			return isTexture(texture)
+			return getMaterial(texture)
 		}
 	}
 	return ""
 }
 
 func remapTexture(line string) string {
-	return isTexture(line)
+	return getMaterial(line)
 }
