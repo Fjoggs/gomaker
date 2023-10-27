@@ -11,8 +11,8 @@ func TestGomaker(t *testing.T) {
 
 func TestReadMap(t *testing.T) {
 	filePath := "resources/test.map"
-	expected := Materials{map[string]int{"resources/test_texture_3.tga": 2, "resources/test_texture.jpg": 2}, map[string]int{"not/a/texture": 1}}
-	actual := readMap(filePath, "")
+	expected := Materials{map[string]int{"testmap/test_texture_3.tga": 2, "testmap/test_texture.jpg": 2}, map[string]int{"not/a/texture": 1}}
+	actual := readMap(filePath, "resources/textures/")
 
 	equalTextures := reflect.DeepEqual(actual.textures, expected.textures)
 	if !equalTextures {
@@ -144,12 +144,13 @@ func TestSortMaterials(t *testing.T) {
 		expected Materials
 	}{
 		{
-			[]string{"test_texture_3", "not/a/texture", "test_texture"},
-			Materials{map[string]int{"resources/test_texture_3.tga": 1, "resources/test_texture.jpg": 1}, map[string]int{"not/a/texture": 1}},
+			[]string{"testmap/test_texture_3", "not/a/texture", "testmap/test_texture"},
+			Materials{map[string]int{"testmap/test_texture_3.tga": 1, "testmap/test_texture.jpg": 1}, map[string]int{"not/a/texture": 1}},
 		},
 	}
+
 	for _, test := range tests {
-		actual := sortMaterials(test.input, "resources/")
+		actual := sortMaterials(test.input, "resources/textures/")
 		equalTextures := reflect.DeepEqual(actual.textures, test.expected.textures)
 		if !equalTextures {
 			t.Errorf("Expected %v got %v for %s", test.expected.textures, actual.textures, test.input)

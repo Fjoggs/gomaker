@@ -33,26 +33,27 @@ func formatPath(texture string) string {
 	return strings.Replace(texture, "textures/", "", 1)
 }
 
-func isTexture(material string, rootPath string) (bool, string) {
-	path := addTrailingSlash(rootPath) + material
-	jpg := fmt.Sprintf("%s.jpg", path)
-	tga := fmt.Sprintf("%s.tga", path)
+func isTexture(material string, textureFolderPath string) (bool, string) {
+	fsPath := addTrailingSlash(textureFolderPath) + material
+	jpg := fmt.Sprintf("%s.jpg", fsPath)
+	tga := fmt.Sprintf("%s.tga", fsPath)
 	jpgFile, jpgErr := os.Open(jpg)
 
 	if jpgErr == nil {
-		return true, jpg
+		return true, fmt.Sprintf("%s.jpg", material)
 	} else {
-		log.Printf("Failed opening jpg file with path %s, error %s", path, jpgErr)
+		log.Printf("Failed opening jpg file with path %s, error %s", fsPath, jpgErr)
 	}
 	defer jpgFile.Close()
 
 	tgaFile, tgaErr := os.Open(tga)
 
 	if tgaErr == nil {
-		return true, tga
+		return true, fmt.Sprintf("%s.tga", material)
 	} else {
-		log.Printf("Failed opening tga file with path %s, error %s", path, tgaErr)
+		log.Printf("Failed opening tga file with path %s, error %s", fsPath, tgaErr)
 	}
+
 	defer tgaFile.Close()
 	return false, material
 }

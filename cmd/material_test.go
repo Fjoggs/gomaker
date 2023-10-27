@@ -71,16 +71,20 @@ func TestIsTexture(t *testing.T) {
 		expectedBool    bool
 		expectedTexture string
 	}{
-		{"test_texture", true, "resources/test_texture.jpg"},
-		{"test_texture_2", false, "test_texture_2"},
-		{"test_texture_3", true, "resources/test_texture_3.tga"},
+		{"testmap/test_texture", true, "testmap/test_texture.jpg"},
+		{"testmap/test_texture_2", false, "testmap/test_texture_2"},
+		{"testmap/test_texture_3", true, "testmap/test_texture_3.tga"},
 	}
-	rootPath := "resources/"
+	textureBasePath := "resources/textures/"
 	for _, test := range tests {
-		actualBool, actualTexture := isTexture(test.input, rootPath)
-		if actualBool != test.expectedBool && actualTexture != test.expectedTexture {
+		actualBool, actualTexture := isTexture(test.input, textureBasePath)
+		if actualBool != test.expectedBool {
 			t.Errorf("Expected %v got %v for %v", test.expectedBool, actualBool, test.input)
 		}
+		if actualTexture != test.expectedTexture {
+			t.Errorf("Expected %v got %v for %v", test.expectedTexture, actualTexture, test.input)
+		}
+
 	}
 }
 

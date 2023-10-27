@@ -26,7 +26,7 @@ func main() {
 	fmt.Println(textures)
 }
 
-func readMap(path string, basePath string) Materials {
+func readMap(path string, textureFolderPath string) Materials {
 	textures := []string{}
 	file, err := os.Open(path)
 
@@ -45,7 +45,7 @@ func readMap(path string, basePath string) Materials {
 		log.Fatal(err)
 	}
 
-	materials := sortMaterials(textures, basePath)
+	materials := sortMaterials(textures, textureFolderPath)
 
 	return materials
 }
