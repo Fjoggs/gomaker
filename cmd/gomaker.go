@@ -107,8 +107,10 @@ func sortMaterials(materials []string, basePath string) Materials {
 		isT, filePath := isTexture(material, basePath)
 		if isT {
 			sorted.textures[filePath] = sorted.textures[filePath] + 1
+			// It can also be a shader
+			sorted.shaders[material] = sorted.shaders[material] + 1
 		} else {
-			sorted.shaders[filePath] = sorted.shaders[filePath] + 1
+			sorted.shaders[material] = sorted.shaders[material] + 1
 		}
 	}
 	return sorted
