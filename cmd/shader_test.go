@@ -1,19 +1,23 @@
 package gomaker
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 )
 
 func TestExtractTexturesFromUsedShaders(t *testing.T) {
-	input := map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1}
-	expectedTextures := map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader_2": 1, "testmap/test_shader_3": 1, "testmap/test_texture": 1}
-	expectedShaderFiles := []string{"testmap.shader"}
-	actual, actualShaderFiles := extractTexturesFromUsedShaders(input, "resources/scripts")
+	input := map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1, "testmap/test_shader_2": 1}
+	expectedTextures := map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader_2": 1, "testmap/test_shader_3": 1, "testmap/test_texture": 1, "testmap/test_shader_4": 1, "testmap/test_shader_5": 1}
+	expectedShaderNames := []string{"testmap/test_shader_2", "testmap/test_shader"}
+	expectedShaderFiles := []string{"test_shader_2.shader", "testmap.shader"}
+	actual, actualShaderNames, actualShaderFiles := extractTexturesFromUsedShaders(input, "resources/scripts")
 
 	if !reflect.DeepEqual(actual, expectedTextures) {
 		t.Errorf("Expected %v got %v for %v", expectedTextures, actual, input)
+	}
+
+	if !isEqual(actualShaderNames, expectedShaderNames) {
+		t.Errorf("Expected %v got %v for %v", expectedShaderNames, actualShaderNames, input)
 	}
 
 	if !isEqual(actualShaderFiles, expectedShaderFiles) {
@@ -23,12 +27,17 @@ func TestExtractTexturesFromUsedShaders(t *testing.T) {
 
 func TestCombineTexturesFromShaders(t *testing.T) {
 	textures := map[string]int{}
-	input := []Shader{{"testmap/test_shader_2", []string{}, map[string]int{"testmap/test_shader_4": 1, "testmap/test_shader_5": 1}}}
-	expected := map[string]int{"testmap/test_shader_4": 1, "testmap/test_shader_5": 1}
-	actual := combineTexturesFromShaders(input, textures)
+	shaderNames := []string{}
+	input := []Shader{{"testmap/test_shader_2", []string{}, map[string]int{"testmap/test_shader_4": 1, "testmap/test_shader_5": 1}}, {"testmap/test_shader", []string{}, map[string]int{"testmap/test_shader_2": 1, "testmap/test_shader_3": 1}}}
+	expectedTextures := map[string]int{"testmap/test_shader_4": 1, "testmap/test_shader_5": 1, "testmap/test_shader_2": 1, "testmap/test_shader_3": 1}
+	expectedShaders := []string{"testmap/test_shader_2", "testmap/test_shader"}
+	actualTextures, actualShaders := combineTexturesFromShaders(input, textures, shaderNames)
 
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Expected %v got %v for %v", expected, actual, input)
+	if !reflect.DeepEqual(actualTextures, expectedTextures) {
+		t.Errorf("Expected %v got %v for %v", expectedTextures, actualTextures, input)
+	}
+	if !isEqual(actualShaders, expectedShaders) {
+		t.Errorf("Expected %v got %v for %v", expectedShaders, actualShaders, input)
 	}
 }
 
@@ -44,7 +53,6 @@ func TestParseShaderFile(t *testing.T) {
 
 	for _, test := range tests {
 		actual := parseShaderFile(test.shadersFromMapFile, test.shaderFileName, "resources/scripts")
-		fmt.Println("actual", actual)
 		if len(actual) != len(test.expected) {
 			t.Errorf("Expected %v got %v for %v", test.expected, actual, test)
 		}

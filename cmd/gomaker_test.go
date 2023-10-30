@@ -11,18 +11,18 @@ func TestGomaker(t *testing.T) {
 
 func TestReadMap(t *testing.T) {
 	filePath := "resources/test.map"
-	expected := Materials{map[string]int{"testmap/test_texture_3.tga": 2, "testmap/test_texture.jpg": 2}, map[string]int{"testmap/test_texture_3": 2, "testmap/test_texture": 2, "testmap/test_shader": 1}}
-	actual := readMap(filePath, "resources/textures/")
+	expected := Materials{map[string]int{"testmap/test_texture_3.tga": 1, "testmap/test_texture.jpg": 1, "testmap/test_shader_2.tga": 1, "testmap/test_shader_3.jpg": 1, "testmap/test_model_texture_1.jpg": 1, "testmap/test_model_texture_2.tga": 1}, map[string]int{"testmap/test_texture_3": 2, "testmap/test_texture": 2}}
+	expectedShaderNames := []string{"testmap/test_shader_2", "testmap/test_shader"}
+	actual, actualShaderNames := readMap(filePath, "resources/textures/")
 
-	equalTextures := reflect.DeepEqual(actual.textures, expected.textures)
+	equalTextures := reflect.DeepEqual(actual, expected.textures)
 	if !equalTextures {
-		t.Errorf("Expected %v got %v", expected.textures, actual.textures)
-	}
-	equalShaders := reflect.DeepEqual(actual.shaders, expected.shaders)
-	if !equalShaders {
-		t.Errorf("Expected %v got %v", expected.shaders, actual.shaders)
+		t.Errorf("Expected %v got %v", expected.textures, actual)
 	}
 
+	if !isEqual(actualShaderNames, expectedShaderNames) {
+		t.Errorf("Expected %v got %v", expectedShaderNames, actualShaderNames)
+	}
 }
 
 func TestGetMaterials(t *testing.T) {
@@ -52,13 +52,13 @@ func TestGetMaterials(t *testing.T) {
 		{`"classname" "misc_model"`, []string{}},
 		{`"origin" "-924 -4 536"`, []string{}},
 		{`"model" "resources/test-model.ase"`, []string{}},
-		{"}", []string{"testmap/test_texture"}},
+		{"}", []string{"testmap/test_model_texture_1"}},
 		{"// Entity 3", []string{}},
 		{"{", []string{}},
 		{`"classname" "misc_model"`, []string{}},
 		{`"origin" "-924 -4 536"`, []string{}},
 		{`"model" "resources/test-material.obj"`, []string{}},
-		{"}", []string{"testmap/test_texture"}},
+		{"}", []string{"testmap/test_model_texture_2"}},
 	}
 	for index, test := range tests {
 		actual := getMaterials(test.input)
@@ -100,7 +100,7 @@ func TestHandleEntity(t *testing.T) {
 			`"model" "resources/test-model.ase"`,
 			`"angles" "-0 0 -180"`,
 			"}",
-		}, []string{"testmap/test_texture"}},
+		}, []string{"testmap/test_model_texture_1"}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,

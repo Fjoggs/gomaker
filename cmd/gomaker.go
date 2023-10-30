@@ -22,12 +22,13 @@ func init() {
 
 func main() {
 	filePath := "resources/test.map"
-	textures := readMap(filePath, "textures/")
+	textures, shaderNames := readMap(filePath, "textures/")
 	fmt.Println(textures)
+	fmt.Println(shaderNames)
 }
 
-func readMap(path string, textureFolderPath string) Materials {
-	textures := []string{}
+func readMap(path string, textureFolderPath string) (map[string]int, []string) {
+	unsortedMaterials := []string{}
 	file, err := os.Open(path)
 
 	if err != nil {
@@ -38,16 +39,18 @@ func readMap(path string, textureFolderPath string) Materials {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		newMaterials := getMaterials(scanner.Text())
-		textures = combineSlices([][]string{textures, newMaterials})
+		unsortedMaterials = combineSlices([][]string{unsortedMaterials, newMaterials})
 	}
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
 
-	materials := sortMaterials(textures, textureFolderPath)
+	materials := sortMaterials(unsortedMaterials, textureFolderPath)
+	textures, shaderNames, _ := extractTexturesFromUsedShaders(materials.shaders, "resources/scripts")
 
-	return materials
+	textures = addExtension(textures, "resources/textures")
+	return textures, shaderNames
 }
 
 func getMaterials(line string) []string {
@@ -114,4 +117,15 @@ func sortMaterials(materials []string, basePath string) Materials {
 		}
 	}
 	return sorted
+}
+
+func addExtension(textures map[string]int, basePath string) map[string]int {
+	returnValue := map[string]int{}
+	for material := range textures {
+		isT, filePath := isTexture(material, basePath)
+		if isT {
+			returnValue[filePath] = returnValue[filePath] + 1
+		}
+	}
+	return returnValue
 }

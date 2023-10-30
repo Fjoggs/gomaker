@@ -36,7 +36,7 @@ func TestParseEntity(t *testing.T) {
 			`"model" "resources/test-model.ase"`,
 			`"angles" "-0 0 -180"`,
 			"}",
-		}, []string{"testmap/test_texture"}},
+		}, []string{"testmap/test_model_texture_1"}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
@@ -50,7 +50,7 @@ func TestParseEntity(t *testing.T) {
 			`"classname" "misc_model"`,
 			`"model" "resources/test-material.obj"`,
 			"}",
-		}, []string{"testmap/test_texture"}},
+		}, []string{"testmap/test_model_texture_2"}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
@@ -133,9 +133,9 @@ func TestParseModel(t *testing.T) {
 		path     string
 		expected []string
 	}{
-		{"resources/test-model.ase", []string{"testmap/test_texture"}},
+		{"resources/test-model.ase", []string{"testmap/test_model_texture_1"}},
 		{"resources/test-model-2.ase", []string{"texture_test/concrete_tile", "texture_test/texture-2"}},
-		{"resources/test-material.mtl", []string{"testmap/test_texture"}},
+		{"resources/test-material.mtl", []string{"testmap/test_model_texture_2"}},
 		{"resources/test-material-2.mtl", []string{"texture_test/concrete_tile"}},
 	}
 	for _, test := range tests {
