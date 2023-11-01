@@ -1,6 +1,7 @@
 package gomaker
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -27,7 +28,7 @@ func TestIsEntity(t *testing.T) {
 func TestParseEntity(t *testing.T) {
 	tests := []struct {
 		input    []string
-		expected []string
+		expected map[string]int
 	}{
 		{[]string{
 			"{",
@@ -36,7 +37,7 @@ func TestParseEntity(t *testing.T) {
 			`"model" "resources/test-model.ase"`,
 			`"angles" "-0 0 -180"`,
 			"}",
-		}, []string{"testmap/test_model_texture_1"}},
+		}, map[string]int{"testmap/test_model_texture_1": 1}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
@@ -44,26 +45,26 @@ func TestParseEntity(t *testing.T) {
 			`"model" "resources/test-model-2.ase"`,
 			`"angles" "-0 0 -180"`,
 			"}",
-		}, []string{"texture_test/concrete_tile", "texture_test/texture-2"}},
+		}, map[string]int{"texture_test/concrete_tile": 1, "texture_test/texture-2": 1}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
 			`"model" "resources/test-material.obj"`,
 			"}",
-		}, []string{"testmap/test_model_texture_2"}},
+		}, map[string]int{"testmap/test_model_texture_2": 1}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
 			`"model" "resources/test-material-2.obj"`,
 			"}",
-		}, []string{"texture_test/concrete_tile"}},
+		}, map[string]int{"texture_test/concrete_tile": 1}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
 			`"model" "resources/test-material-2.obj"`,
 			`"_remap" ":*;textures/test_texture/texture-2"`,
 			"}",
-		}, []string{"test_texture/texture-2"}},
+		}, map[string]int{"test_texture/texture-2": 1}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
@@ -72,20 +73,20 @@ func TestParseEntity(t *testing.T) {
 			`"angles" "-0 0 -180"`,
 			`"_remap" "*;textures/testmap/test_texture"`,
 			"}",
-		}, []string{"testmap/test_texture"}},
+		}, map[string]int{"testmap/test_texture": 1}},
 		{[]string{
 			"{",
 			`"classname" "worldspawn"`,
 			`"message" "Test map"`,
 			`"ambient" "10"`,
 			"}",
-		}, []string{}},
-		{[]string{"{", "}"}, []string{}},
+		}, map[string]int{}},
+		{[]string{"{", "}"}, map[string]int{}},
 	}
 	for _, test := range tests {
 		actual := parseEntity(test.input)
-		if !isEqual(actual, test.expected) {
-			t.Errorf("Expected %s got %s for %v", test.expected, actual, test.input)
+		if !reflect.DeepEqual(actual, test.expected) {
+			t.Errorf("Expected %v got %v for %v", test.expected, actual, test.input)
 		}
 	}
 
@@ -131,17 +132,17 @@ func TestRemapTexture(t *testing.T) {
 func TestParseModel(t *testing.T) {
 	tests := []struct {
 		path     string
-		expected []string
+		expected map[string]int
 	}{
-		{"resources/test-model.ase", []string{"testmap/test_model_texture_1"}},
-		{"resources/test-model-2.ase", []string{"texture_test/concrete_tile", "texture_test/texture-2"}},
-		{"resources/test-material.mtl", []string{"testmap/test_model_texture_2"}},
-		{"resources/test-material-2.mtl", []string{"texture_test/concrete_tile"}},
+		{"resources/test-model.ase", map[string]int{"testmap/test_model_texture_1": 1}},
+		{"resources/test-model-2.ase", map[string]int{"texture_test/concrete_tile": 1, "texture_test/texture-2": 1}},
+		{"resources/test-material.mtl", map[string]int{"testmap/test_model_texture_2": 1}},
+		{"resources/test-material-2.mtl", map[string]int{"texture_test/concrete_tile": 1}},
 	}
 	for _, test := range tests {
 		actual := parseModel(test.path)
-		if !isEqual(actual, test.expected) {
-			t.Errorf("Expected %s got %s", test.expected, actual)
+		if !reflect.DeepEqual(actual, test.expected) {
+			t.Errorf("Expected %v got %v", test.expected, actual)
 		}
 	}
 }

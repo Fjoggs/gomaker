@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 type Materials struct {
@@ -22,13 +23,16 @@ func init() {
 
 func main() {
 	filePath := "resources/test.map"
-	textures, shaderNames := readMap(filePath, "textures/")
+	textures, sounds, shaderNames := readMap(filePath, "resources")
 	fmt.Println(textures)
+	fmt.Println(sounds)
 	fmt.Println(shaderNames)
 }
 
-func readMap(path string, textureFolderPath string) (map[string]int, []string) {
-	unsortedMaterials := []string{}
+func readMap(path string, baseFolderPath string) (map[string]int, map[string]int, []string) {
+	start := time.Now()
+	materials := map[string]int{}
+	sounds := map[string]int{}
 	file, err := os.Open(path)
 
 	if err != nil {
@@ -38,23 +42,39 @@ func readMap(path string, textureFolderPath string) (map[string]int, []string) {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		newMaterials := getMaterials(scanner.Text())
-		unsortedMaterials = combineSlices([][]string{unsortedMaterials, newMaterials})
+		line := scanner.Text()
+		addMaterials(line, materials)
+		addSounds(line, sounds)
 	}
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
 
-	materials := sortMaterials(unsortedMaterials, textureFolderPath)
-	textures, shaderNames, _ := extractTexturesFromUsedShaders(materials.shaders, "resources/scripts")
+	textures, shaderNames, _ := extractTexturesFromUsedShaders(materials, "resources/scripts")
 
-	textures = addExtension(textures, "resources/textures")
-	return textures, shaderNames
+	textures = addTextureFileExtension(textures, addTrailingSlash(baseFolderPath))
+	elapsed := time.Since(start)
+	fmt.Println("Elapsed time", elapsed)
+	return textures, sounds, shaderNames
 }
 
-func getMaterials(line string) []string {
-	materials := []string{}
+func addMaterials(line string, materials map[string]int) {
+	newMaterials := getMaterials(line)
+	if len(newMaterials) > 0 {
+		mergeMaps(newMaterials, materials)
+	}
+}
+
+func addSounds(line string, sounds map[string]int) {
+	sound := getSound(line)
+	if len(sound) > 0 {
+		sounds[sound] = sounds[sound] + 1
+	}
+}
+
+func getMaterials(line string) map[string]int {
+	materials := map[string]int{}
 	if isEntity(line) {
 		parsingEntity = true
 	} else if isBrush(line) {
@@ -70,7 +90,7 @@ func getMaterials(line string) []string {
 		} else {
 			texture := getMaterial(line)
 			if len(texture) > 0 {
-				materials = append(materials, texture)
+				materials[texture] = materials[texture] + 1
 			}
 		}
 	}
@@ -82,7 +102,7 @@ func handleBrush(line string) string {
 	return getMaterial(line)
 }
 
-func handleEntity(lines []string) []string {
+func handleEntity(lines []string) map[string]int {
 	parsingEntity = false
 	return parseEntity(lines)
 }
@@ -91,41 +111,8 @@ func isClosingBracket(line string) bool {
 	return strings.Contains(line, "}")
 }
 
-func combineSlices(slices [][]string) []string {
-	var totalLen int
-	for _, s := range slices {
-		totalLen += len(s)
+func mergeMaps(source map[string]int, destination map[string]int) {
+	for key, count := range source {
+		destination[key] = count
 	}
-	tmp := make([]string, totalLen)
-	var i int
-	for _, s := range slices {
-		i += copy(tmp[i:], s)
-	}
-	return tmp
-}
-
-func sortMaterials(materials []string, basePath string) Materials {
-	sorted := Materials{make(map[string]int), make(map[string]int)}
-	for _, material := range materials {
-		isT, filePath := isTexture(material, basePath)
-		if isT {
-			sorted.textures[filePath] = sorted.textures[filePath] + 1
-			// It can also be a shader
-			sorted.shaders[material] = sorted.shaders[material] + 1
-		} else {
-			sorted.shaders[material] = sorted.shaders[material] + 1
-		}
-	}
-	return sorted
-}
-
-func addExtension(textures map[string]int, basePath string) map[string]int {
-	returnValue := map[string]int{}
-	for material := range textures {
-		isT, filePath := isTexture(material, basePath)
-		if isT {
-			returnValue[filePath] = returnValue[filePath] + 1
-		}
-	}
-	return returnValue
 }

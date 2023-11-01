@@ -46,3 +46,17 @@
 "model" "resources/test-material.obj"
 "angles" "-0 0 -180"
 }
+// entity 3
+{
+"classname" "target_speaker"
+"origin" "296 1032 488"
+"spawnflags" "1"
+"noise" "sound/testmap/sound-file.wav"
+}
+// entity 4
+{
+"classname" "target_speaker"
+"origin" "296 1032 184"
+"spawnflags" "1"
+"noise" "sound/world/dontinclude.wav"
+}

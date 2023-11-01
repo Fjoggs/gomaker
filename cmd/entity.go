@@ -18,8 +18,8 @@ func isEntity(line string) bool {
 	return match
 }
 
-func parseEntity(lines []string) []string {
-	textures := []string{}
+func parseEntity(lines []string) map[string]int {
+	textures := map[string]int{}
 	modelPathLine := ""
 	hasRemap := false
 	isModel := false
@@ -30,7 +30,8 @@ func parseEntity(lines []string) []string {
 		}
 		if strings.Contains(line, "_remap") {
 			hasRemap = true
-			textures = append(textures, remapTexture(line))
+			texture := remapTexture(line)
+			textures[texture] = textures[texture] + 1
 			return textures
 		} else if strings.Contains(line, ".ase") {
 			modelPathLine = line
@@ -54,8 +55,8 @@ func modelPath(line string) string {
 	return ""
 }
 
-func parseModel(modelPath string) []string {
-	textures := []string{}
+func parseModel(modelPath string) map[string]int {
+	textures := map[string]int{}
 	file, err := os.Open(modelPath)
 
 	if err != nil {
@@ -73,7 +74,7 @@ func parseModel(modelPath string) []string {
 			texture = aseTexture(line)
 		}
 		if len(texture) > 0 {
-			textures = append(textures, texture)
+			textures[texture] = textures[texture] + 1
 		}
 
 	}

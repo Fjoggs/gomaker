@@ -33,8 +33,8 @@ func formatPath(texture string) string {
 	return strings.Replace(texture, "textures/", "", 1)
 }
 
-func isTexture(material string, textureFolderPath string) (bool, string) {
-	fsPath := addTrailingSlash(textureFolderPath) + material
+func isTexture(material string, baseFolderPath string) (bool, string) {
+	fsPath := addTrailingSlash(baseFolderPath) + "textures/" + material
 	jpg := fmt.Sprintf("%s.jpg", fsPath)
 	tga := fmt.Sprintf("%s.tga", fsPath)
 	jpgFile, jpgErr := os.Open(jpg)
@@ -70,4 +70,30 @@ func addTrailingSlash(path string) string {
 			return path + "/"
 		}
 	}
+}
+
+func sortMaterials(materials map[string]int, basePath string) Materials {
+	sorted := Materials{make(map[string]int), make(map[string]int)}
+	for material := range materials {
+		isT, filePath := isTexture(material, basePath)
+		if isT {
+			sorted.textures[filePath] = sorted.textures[filePath] + 1
+			// It can also be a shader
+			sorted.shaders[material] = sorted.shaders[material] + 1
+		} else {
+			sorted.shaders[material] = sorted.shaders[material] + 1
+		}
+	}
+	return sorted
+}
+
+func addTextureFileExtension(textures map[string]int, basePath string) map[string]int {
+	returnValue := map[string]int{}
+	for material := range textures {
+		isT, filePath := isTexture(material, basePath)
+		if isT {
+			returnValue[filePath] = returnValue[filePath] + 1
+		}
+	}
+	return returnValue
 }

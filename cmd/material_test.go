@@ -1,6 +1,7 @@
 package gomaker
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -75,9 +76,9 @@ func TestIsTexture(t *testing.T) {
 		{"testmap/test_texture_2", false, "testmap/test_texture_2"},
 		{"testmap/test_texture_3", true, "testmap/test_texture_3.tga"},
 	}
-	textureBasePath := "resources/textures/"
+	baseFolderPath := "resources/"
 	for _, test := range tests {
-		actualBool, actualTexture := isTexture(test.input, textureBasePath)
+		actualBool, actualTexture := isTexture(test.input, baseFolderPath)
 		if actualBool != test.expectedBool {
 			t.Errorf("Expected %v got %v for %v", test.expectedBool, actualBool, test.input)
 		}
@@ -105,5 +106,49 @@ func TestAddTrailingSlash(t *testing.T) {
 		if actual != test.expected {
 			t.Errorf("Expected %v got %s for %v", test.expected, actual, test.input)
 		}
+	}
+}
+
+func TestSortMaterials(t *testing.T) {
+	tests := []struct {
+		input    map[string]int
+		expected Materials
+	}{
+		{
+			map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1},
+			Materials{map[string]int{"testmap/test_texture_3.tga": 1, "testmap/test_texture.jpg": 1}, map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1}},
+		},
+	}
+
+	for _, test := range tests {
+		actual := sortMaterials(test.input, "resources/")
+		equalTextures := reflect.DeepEqual(actual.textures, test.expected.textures)
+		if !equalTextures {
+			t.Errorf("Expected %v got %v for %v", test.expected.textures, actual.textures, test.input)
+		}
+		equalShaders := reflect.DeepEqual(actual.shaders, test.expected.shaders)
+		if !equalShaders {
+			t.Errorf("Expected %v got %v for %v", test.expected.shaders, actual.shaders, test.input)
+		}
+	}
+}
+
+func TestAddTextureFileExtension(t *testing.T) {
+	tests := []struct {
+		input    map[string]int
+		expected map[string]int
+	}{
+		{
+			map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1},
+			map[string]int{"testmap/test_texture_3.tga": 1, "testmap/test_texture.jpg": 1},
+		},
+	}
+
+	for _, test := range tests {
+		actual := addTextureFileExtension(test.input, "resources/")
+		if !reflect.DeepEqual(actual, test.expected) {
+			t.Errorf("Expected %v got %v for %v", test.expected, actual, test.input)
+		}
+
 	}
 }
