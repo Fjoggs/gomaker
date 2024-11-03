@@ -10,11 +10,11 @@ func TestGomaker(t *testing.T) {
 }
 
 func TestReadMap(t *testing.T) {
-	filePath := "resources/test.map"
+	mapName := "test.map"
 	expected := Materials{map[string]int{"testmap/test_texture_3.tga": 1, "testmap/test_texture.jpg": 1, "testmap/test_shader_2.tga": 1, "testmap/test_shader_3.jpg": 1, "testmap/test_model_texture_1.jpg": 1, "testmap/test_model_texture_2.tga": 1}, map[string]int{"testmap/test_texture_3": 2, "testmap/test_texture": 2}}
 	expectedSounds := map[string]int{"sound/testmap/sound-file.wav": 1}
 	expectedShaderNames := []string{"testmap/test_shader_2", "testmap/test_shader"}
-	actual, actualSounds, actualShaderNames := readMap(filePath, "resources")
+	actual, actualSounds, actualShaderNames := readMap(mapName, "resources")
 
 	if !reflect.DeepEqual(actual, expected.textures) {
 		t.Errorf("Expected %v got %v", expected.textures, actual)
@@ -62,7 +62,7 @@ func TestGetMaterials(t *testing.T) {
 		{"{", emptyMap},
 		{`"classname" "misc_model"`, emptyMap},
 		{`"origin" "-924 -4 536"`, emptyMap},
-		{`"model" "resources/test-model.ase"`, emptyMap},
+		{`"model" "resources/models/test-model.ase"`, emptyMap},
 		{`"angles" "-0 0 -180"`, emptyMap},
 		{`"_remap" "*;textures/testmap/test_texture"`, emptyMap},
 		{"}", map[string]int{"testmap/test_texture": 1}},
@@ -78,13 +78,13 @@ func TestGetMaterials(t *testing.T) {
 		{"{", emptyMap},
 		{`"classname" "misc_model"`, emptyMap},
 		{`"origin" "-924 -4 536"`, emptyMap},
-		{`"model" "resources/test-model.ase"`, emptyMap},
+		{`"model" "resources/models/test-model.ase"`, emptyMap},
 		{"}", map[string]int{"testmap/test_model_texture_1": 1}},
 		{"// Entity 3", emptyMap},
 		{"{", emptyMap},
 		{`"classname" "misc_model"`, emptyMap},
 		{`"origin" "-924 -4 536"`, emptyMap},
-		{`"model" "resources/test-material.obj"`, emptyMap},
+		{`"model" "resources/models/test-material.obj"`, emptyMap},
 		{"}", map[string]int{"testmap/test_model_texture_2": 1}},
 	}
 	for index, test := range tests {
@@ -125,7 +125,7 @@ func TestHandleEntity(t *testing.T) {
 			"{",
 			`"classname" "misc_model"`,
 			`"origin" "-924 -4 536"`,
-			`"model" "resources/test-model.ase"`,
+			`"model" "resources/models/test-model.ase"`,
 			`"angles" "-0 0 -180"`,
 			"}",
 		}, map[string]int{"testmap/test_model_texture_1": 1}},

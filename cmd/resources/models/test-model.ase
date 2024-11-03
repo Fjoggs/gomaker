@@ -1,70 +1,70 @@
 *3DSMAX_ASCIIEXPORT	200
 *COMMENT "Ascii Scene Exporter v2.51"
 *SCENE {
-	*SCENE_FILENAME "/home/fjogen/games/quake3/baseq3/models/pillar_cliff.blend"
-	*SCENE_FIRSTFRAME 0
-	*SCENE_LASTFRAME 100
-	*SCENE_FRAMESPEED 30
-	*SCENE_TICKSPERFxRAME 160
-	*SCENE_BACKGROUND_STATIC  0.0000 0.0000 0.0000
-	*SCENE_AMBIENT_STATIC  0.0000 0.0000 0.0000
+	*SCENE_FILENAME "/home/fjogen/games/quake3/baseq3/models/pillar_cliff.blend"               
+	*SCENE_FIRSTFRAME 0               
+	*SCENE_LASTFRAME 100               
+	*SCENE_FRAMESPEED 30               
+	*SCENE_TICKSPERFxRAME 160               
+	*SCENE_BACKGROUND_STATIC  0.0000 0.0000 0.0000               
+	*SCENE_AMBIENT_STATIC  0.0000 0.0000 0.0000               
 }
-*MATERIAL_LIST {
-	*MATERIAL_COUNT 1
-	*MATERIAL 0 {
-		*MATERIAL_NAME "Material.001"
-		*MATERIAL_CLASS "Standard"
-		*MATERIAL_AMBIENT  0.0000 0.0000 0.0000
-		*MATERIAL_DIFFUSE  0.8000 0.8000 0.8000
-		*MATERIAL_SPECULAR  1.0000 1.0000 1.0000
-		*MATERIAL_SHINE  0.0978
-		*MATERIAL_SHINESTRENGTH  0.5000
-		*MATERIAL_TRANSPARENCY  0.0000
-		*MATERIAL_WIRESIZE  1.0000
-		*MATERIAL_SHADING Cooktorr
-		*MATERIAL_XP_FALLOFF  0.0000
-		*MATERIAL_SELFILLUM  0.0000
-		*MATERIAL_FALLOFF In
-		*MATERIAL_XP_TYPE Filter
-		*MAP_DIFFUSE {
-			*MAP_NAME "Texture.001"
-			*MAP_CLASS "Bitmap"
-			*MAP_SUBNO 1
-			*MAP_AMOUNT  1.0000
-			*BITMAP "//../textures/testmap/test_model_texture_1.jpg"
-			*MAP_TYPE Screen 
-			*UVW_U_OFFSET  0.0000
-			*UVW_V_OFFSET  0.0000
-			*UVW_U_TILING  1.0000
-			*UVW_V_TILING  1.0000
-			*UVW_ANGLE  0.0000
-			*UVW_BLUR  1.0000
-			*UVW_BLUR_OFFSET  0.0000
-			*UVW_NOUSE_AMT  1.0000
-			*UVW_NOISE_SIZE  1.0000
-			*UVW_NOISE_LEVEL 1
-			*UVW_NOISE_PHASE  0.0000
-			*BITMAP_FILTER Pyramidal
-		}
+*MATERIAL_LIST {                    
+	*MATERIAL_COUNT 1                    
+	*MATERIAL 0 {                    
+		*MATERIAL_NAME "Material.001"                       
+		*MATERIAL_CLASS "Standard"                       
+		*MATERIAL_AMBIENT  0.0000 0.0000 0.0000                       
+		*MATERIAL_DIFFUSE  0.8000 0.8000 0.8000                       
+		*MATERIAL_SPECULAR  1.0000 1.0000 1.0000                       
+		*MATERIAL_SHINE  0.0978                       
+		*MATERIAL_SHINESTRENGTH  0.5000                       
+		*MATERIAL_TRANSPARENCY  0.0000                       
+		*MATERIAL_WIRESIZE  1.0000                       
+		*MATERIAL_SHADING Cooktorr                       
+		*MATERIAL_XP_FALLOFF  0.0000                       
+		*MATERIAL_SELFILLUM  0.0000                       
+		*MATERIAL_FALLOFF In                       
+		*MATERIAL_XP_TYPE Filter                       
+		*MAP_DIFFUSE {                       
+			*MAP_NAME "Texture.001"                       
+			*MAP_CLASS "Bitmap"                       
+			*MAP_SUBNO 1                       
+			*MAP_AMOUNT  1.0000                       
+			*BITMAP "//../textures/testmap/test_model_texture_1.jpg"                       
+			*MAP_TYPE Screen                       
+			*UVW_U_OFFSET  0.0000                       
+			*UVW_V_OFFSET  0.0000                       
+			*UVW_U_TILING  1.0000                       
+			*UVW_V_TILING  1.0000                       
+			*UVW_ANGLE  0.0000                       
+			*UVW_BLUR  1.0000                       
+			*UVW_BLUR_OFFSET  0.0000                       
+			*UVW_NOUSE_AMT  1.0000                       
+			*UVW_NOISE_SIZE  1.0000                       
+			*UVW_NOISE_LEVEL 1                       
+			*UVW_NOISE_PHASE  0.0000                       
+			*BITMAP_FILTER Pyramidal                       
+		}                                              
 		*NUMSUBMTLS 0                       
 }
 *GEOMOBJECT {
 	*NODE_NAME "Plane"
-	*NODE_TM {
-		*NODE_NAME "Plane" 
-		*INHERIT_POS 0 0 0
-		*INHERIT_ROT 0 0 0
-		*INHERIT_SCL 0 0 0
-		*TM_ROW0 1.0000 0.0000 0.0000
-		*TM_ROW1 0.0000 1.0000 0.0000
-		*TM_ROW2 0.0000 0.0000 1.0000
-		*TM_ROW3 0.0000 0.0000 0.0000
-		*TM_POS 0.0000 0.0000 0.0000
-		*TM_ROTAXIS 0.0000 0.0000 0.0000
-		*TM_ROTANGLE 0.0000
-		*TM_SCALE 1.0000 1.0000 1.0000
-		*TM_SCALEAXIS 0.0000 0.0000 0.0000
-		*TM_SCALEAXISANG 0.0000
+	*NODE_TM {                       
+		*NODE_NAME "Plane"                       
+		*INHERIT_POS 0 0 0                       
+		*INHERIT_ROT 0 0 0                       
+		*INHERIT_SCL 0 0 0                       
+		*TM_ROW0 1.0000 0.0000 0.0000                       
+		*TM_ROW1 0.0000 1.0000 0.0000                       
+		*TM_ROW2 0.0000 0.0000 1.0000                       
+		*TM_ROW3 0.0000 0.0000 0.0000                       
+		*TM_POS 0.0000 0.0000 0.0000                       
+		*TM_ROTAXIS 0.0000 0.0000 0.0000                       
+		*TM_ROTANGLE 0.0000                       
+		*TM_SCALE 1.0000 1.0000 1.0000                       
+		*TM_SCALEAXIS 0.0000 0.0000 0.0000                       
+		*TM_SCALEAXISANG 0.0000                       
 	}
 	*MESH {
 		*TIMEVALUE 0

@@ -2,7 +2,7 @@ package gomaker
 
 import (
 	"bufio"
-	"fmt"
+	// "fmt"
 	"log"
 	"os"
 	"regexp"
@@ -71,7 +71,7 @@ func parseShaderFile(shadersFromMapFile map[string]int, shaderFileName string, s
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.Contains(line, "qer_editorimage") {
-			fmt.Printf("Editor image %s, ignoring", line)
+			// fmt.Printf("Editor image %s, ignoring", line)
 			continue
 		}
 		texture := getMaterial(line)

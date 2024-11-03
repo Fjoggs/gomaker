@@ -22,18 +22,22 @@ func init() {
 }
 
 func main() {
-	filePath := "resources/test.map"
-	textures, sounds, shaderNames := readMap(filePath, "resources")
+	start := time.Now()
+	mapName := "test.map"
+	textures, sounds, shaderNames := readMap(mapName, "resources")
+	arenaFile := getArenaFile("testmap")
 	fmt.Println(textures)
 	fmt.Println(sounds)
 	fmt.Println(shaderNames)
+	fmt.Println(arenaFile)
+	elapsed := time.Since(start)
+	fmt.Println("Elapsed time", elapsed)
 }
 
-func readMap(path string, baseFolderPath string) (map[string]int, map[string]int, []string) {
-	start := time.Now()
+func readMap(mapName string, baseFolderPath string) (map[string]int, map[string]int, []string) {
 	materials := map[string]int{}
 	sounds := map[string]int{}
-	file, err := os.Open(path)
+	file, err := os.Open(addTrailingSlash(baseFolderPath) + "maps/" + mapName)
 
 	if err != nil {
 		log.Fatal(err)
@@ -54,8 +58,7 @@ func readMap(path string, baseFolderPath string) (map[string]int, map[string]int
 	textures, shaderNames, _ := extractTexturesFromUsedShaders(materials, "resources/scripts")
 
 	textures = addTextureFileExtension(textures, addTrailingSlash(baseFolderPath))
-	elapsed := time.Since(start)
-	fmt.Println("Elapsed time", elapsed)
+
 	return textures, sounds, shaderNames
 }
 

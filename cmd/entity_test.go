@@ -34,7 +34,7 @@ func TestParseEntity(t *testing.T) {
 			"{",
 			`"classname" "misc_model"`,
 			`"origin" "-924 -4 536"`,
-			`"model" "resources/test-model.ase"`,
+			`"model" "resources/models/test-model.ase"`,
 			`"angles" "-0 0 -180"`,
 			"}",
 		}, map[string]int{"testmap/test_model_texture_1": 1}},
@@ -42,26 +42,26 @@ func TestParseEntity(t *testing.T) {
 			"{",
 			`"classname" "misc_model"`,
 			`"origin" "-924 -4 536"`,
-			`"model" "resources/test-model-2.ase"`,
+			`"model" "resources/models/test-model-2.ase"`,
 			`"angles" "-0 0 -180"`,
 			"}",
 		}, map[string]int{"texture_test/concrete_tile": 1, "texture_test/texture-2": 1}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
-			`"model" "resources/test-material.obj"`,
+			`"model" "resources/models/test-material.obj"`,
 			"}",
 		}, map[string]int{"testmap/test_model_texture_2": 1}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
-			`"model" "resources/test-material-2.obj"`,
+			`"model" "resources/models/test-material-2.obj"`,
 			"}",
 		}, map[string]int{"texture_test/concrete_tile": 1}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
-			`"model" "resources/test-material-2.obj"`,
+			`"model" "resources/models/test-material-2.obj"`,
 			`"_remap" ":*;textures/test_texture/texture-2"`,
 			"}",
 		}, map[string]int{"test_texture/texture-2": 1}},
@@ -97,9 +97,9 @@ func TestModelPath(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{`"model" "resources/test-model.ase"`, "resources/test-model.ase"},
-		{`"model" "resources/test-model-2.ase"`, "resources/test-model-2.ase"},
-		{`"model" "resources/test-model-3.obj"`, "resources/test-model-3.obj"},
+		{`"model" "resources/models/test-model.ase"`, "resources/models/test-model.ase"},
+		{`"model" "resources/models/test-model-2.ase"`, "resources/models/test-model-2.ase"},
+		{`"model" "resources/models/test-model-3.obj"`, "resources/models/test-model-3.obj"},
 		{`"model" "maps/models/test-model.ase"`, "maps/models/test-model.ase"},
 	}
 	for _, test := range tests {
@@ -134,10 +134,10 @@ func TestParseModel(t *testing.T) {
 		path     string
 		expected map[string]int
 	}{
-		{"resources/test-model.ase", map[string]int{"testmap/test_model_texture_1": 1}},
-		{"resources/test-model-2.ase", map[string]int{"texture_test/concrete_tile": 1, "texture_test/texture-2": 1}},
-		{"resources/test-material.mtl", map[string]int{"testmap/test_model_texture_2": 1}},
-		{"resources/test-material-2.mtl", map[string]int{"texture_test/concrete_tile": 1}},
+		{"resources/models/test-model.ase", map[string]int{"testmap/test_model_texture_1": 1}},
+		{"resources/models/test-model-2.ase", map[string]int{"texture_test/concrete_tile": 1, "texture_test/texture-2": 1}},
+		{"resources/models/test-material.mtl", map[string]int{"testmap/test_model_texture_2": 1}},
+		{"resources/models/test-material-2.mtl", map[string]int{"texture_test/concrete_tile": 1}},
 	}
 	for _, test := range tests {
 		actual := parseModel(test.path)

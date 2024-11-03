@@ -7,21 +7,28 @@ import (
 
 func TestExtractTexturesFromUsedShaders(t *testing.T) {
 	input := map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1, "testmap/test_shader_2": 1}
-	expectedTextures := map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader_2": 1, "testmap/test_shader_3": 1, "testmap/test_texture": 1, "testmap/test_shader_4": 1, "testmap/test_shader_5": 1}
+	expectedTextures := map[string]int{
+		"testmap/test_texture_3": 1,
+		"testmap/test_shader_2":  1,
+		"testmap/test_shader_3":  1,
+		"testmap/test_texture":   1,
+		"testmap/test_shader_4":  1,
+		"testmap/test_shader_5":  1,
+	}
 	expectedShaderNames := []string{"testmap/test_shader_2", "testmap/test_shader"}
 	expectedShaderFiles := []string{"test_shader_2.shader", "testmap.shader"}
 	actual, actualShaderNames, actualShaderFiles := extractTexturesFromUsedShaders(input, "resources/scripts")
 
 	if !reflect.DeepEqual(actual, expectedTextures) {
-		t.Errorf("Expected %v got %v for %v", expectedTextures, actual, input)
+		t.Errorf("Expected textures %v got %v for %v", expectedTextures, actual, input)
 	}
 
 	if !isEqual(actualShaderNames, expectedShaderNames) {
-		t.Errorf("Expected %v got %v for %v", expectedShaderNames, actualShaderNames, input)
+		t.Errorf("Expected shader names %v got %v for %v", expectedShaderNames, actualShaderNames, input)
 	}
 
 	if !isEqual(actualShaderFiles, expectedShaderFiles) {
-		t.Errorf("Expected %v got %v for %v", expectedShaderFiles, actualShaderFiles, input)
+		t.Errorf("Expected shader files %v got %v for %v", expectedShaderFiles, actualShaderFiles, input)
 	}
 }
 
