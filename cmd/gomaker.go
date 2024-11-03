@@ -3,7 +3,6 @@ package gomaker
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -25,7 +24,7 @@ func main() {
 	start := time.Now()
 	mapName := "test.map"
 	textures, sounds, shaderNames := readMap(mapName, "resources")
-	arenaFile := getArenaFile("testmap")
+	arenaFile := getArenaFile("resources", "testmap")
 	fmt.Println(textures)
 	fmt.Println(sounds)
 	fmt.Println(shaderNames)
@@ -40,7 +39,7 @@ func readMap(mapName string, baseFolderPath string) (map[string]int, map[string]
 	file, err := os.Open(addTrailingSlash(baseFolderPath) + "maps/" + mapName)
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 	defer file.Close()
 
@@ -52,7 +51,7 @@ func readMap(mapName string, baseFolderPath string) (map[string]int, map[string]
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 
 	textures, shaderNames, _ := extractTexturesFromUsedShaders(materials, "resources/scripts")

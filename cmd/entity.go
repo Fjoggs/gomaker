@@ -2,7 +2,7 @@ package gomaker
 
 import (
 	"bufio"
-	"log"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -12,7 +12,7 @@ func isEntity(line string) bool {
 	match, err := regexp.MatchString("// entity", strings.ToLower(line))
 
 	if err != nil {
-		log.Fatal("Something went wrong", err)
+		fmt.Println("Something went wrong", err)
 	}
 
 	return match
@@ -60,7 +60,7 @@ func parseModel(modelPath string) map[string]int {
 	file, err := os.Open(modelPath)
 
 	if err != nil {
-		log.Fatalf("Failed opening file %v with path %s, error %s", file, modelPath, err)
+		fmt.Printf("Failed opening file %v with path %s, error %s", file, modelPath, err)
 	}
 	defer file.Close()
 
@@ -80,7 +80,7 @@ func parseModel(modelPath string) map[string]int {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 	return textures
 }

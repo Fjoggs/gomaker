@@ -1,37 +1,42 @@
 package gomaker
 
 import (
+	"archive/zip"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
-func createPk3(outputFolder string, mapName string, overwrite bool) bool {
+func createPk3(baseq3Folder string, mapName string, overwrite bool) bool {
 	if overwrite {
-		deleteFolderAndSubFolders(fmt.Sprintf("%s%s", addTrailingSlash(outputFolder), addTrailingSlash(mapName)))
+		deleteFolderAndSubFolders(fmt.Sprintf("%s%s", addTrailingSlash(baseq3Folder), addTrailingSlash(mapName)))
 	}
 
 	createDirectory("output", "")
 	pk3Dir := createDirectory(mapName, "output")
 	if pk3Dir {
-		pk3DirPath := fmt.Sprintf("%s%s", addTrailingSlash(outputFolder), addTrailingSlash(mapName))
+		pk3DirPath := fmt.Sprintf("%s%s", addTrailingSlash(baseq3Folder), addTrailingSlash(mapName))
 		envDir := createDirectory("env", pk3DirPath)
 		mapsDir := createDirectory("maps", pk3DirPath)
 		textureDir := createDirectory("textures", pk3DirPath)
+		textureSubDir := createDirectory("randomdir", pk3DirPath+"textures")
 		scriptsDir := createDirectory("scripts", pk3DirPath)
 		soundsDir := createDirectory("sounds", pk3DirPath)
 		levelshotsDir := createDirectory("levelshots", pk3DirPath)
 
 		fmt.Println("Getting arenafile")
-		arenaFile := getArenaFile(mapName)
+		arenaFile := getArenaFile(baseq3Folder, mapName)
 		fmt.Println("Getting levelshot")
-		levelshot := getLevelshot(mapName)
+		levelshot := getLevelshot(baseq3Folder, mapName)
 
 		fmt.Println("Adding arenafile")
-		addResourceIfExists(arenaFile, mapName, outputFolder)
+		addResourceIfExists(baseq3Folder, arenaFile, "output")
 		fmt.Println("Adding levelshot")
-		addResourceIfExists(levelshot, mapName, outputFolder)
+		addResourceIfExists(baseq3Folder, levelshot, "output")
 
 		fmt.Println(pk3Dir)
 		fmt.Println(envDir)
@@ -40,6 +45,7 @@ func createPk3(outputFolder string, mapName string, overwrite bool) bool {
 		fmt.Println(scriptsDir)
 		fmt.Println(soundsDir)
 		fmt.Println(levelshotsDir)
+		fmt.Println(textureSubDir)
 		return true
 	}
 	return false
@@ -56,15 +62,80 @@ func createDirectory(folderName string, mapName string) bool {
 
 	err := os.Mkdir(path, 0777)
 	if err != nil {
-		log.Fatalf("It blew up mate %s\n", err)
+		fmt.Printf("It blew up mate %s\n", err)
 		return false
 	}
 
 	return true
 }
 
-func addResourceIfExists(resourceName string, mapName string, targetFolder string) bool {
-	path := addTrailingSlash(mapName) + resourceName
+func zipOutputFolder(outputFolder string, mapName string) error {
+	targetPath := addTrailingSlash(outputFolder) + mapName + ".pk3"
+	file, err := os.Create(targetPath)
+	if err != nil {
+		fmt.Printf("Error occured while creating zip: %s", err)
+		return err
+	}
+
+	defer file.Close()
+
+	writer := zip.NewWriter(file)
+	defer writer.Close()
+
+	sourcePath := addTrailingSlash(outputFolder) + mapName
+	return filepath.WalkDir(sourcePath, func(path string, dir fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		fileInfo, err := dir.Info()
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("walkdir path %s\n", path)
+		fmt.Printf("walkdir dir %s\n", dir)
+
+		if dir.Name() == mapName {
+			fmt.Println("Omitting map name folder")
+			return nil
+		}
+
+		header, err := zip.FileInfoHeader(fileInfo)
+		if err != nil {
+			return err
+		}
+
+		name := strings.Replace(path, sourcePath, "", 1)
+		header.Method = zip.Deflate
+		header.Name = name
+		if dir.IsDir() {
+			header.Name += "/"
+		}
+
+		headerWriter, err := writer.CreateHeader(header)
+		if err != nil {
+			return err
+		}
+
+		if dir.IsDir() {
+			return nil
+		}
+
+		file, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		_, err = io.Copy(headerWriter, file)
+		return err
+	})
+}
+
+func addResourceIfExists(baseq3Folder string, resourcePath string, outputFolder string) bool {
+	path := fmt.Sprintf("%s%s", addTrailingSlash(baseq3Folder), resourcePath)
+	fmt.Printf("path %s\n", path)
 
 	_, exists := os.Stat(path)
 	if exists != nil {
@@ -78,7 +149,18 @@ func addResourceIfExists(resourceName string, mapName string, targetFolder strin
 		return false
 	}
 
-	destPath := addTrailingSlash(targetFolder) + resourceName
+	destPath := addTrailingSlash(outputFolder) + path
+	destFolder := extractFolderPaths(destPath)
+	_, exists = os.Stat(destFolder)
+	if exists != nil {
+		fmt.Printf("Destination path does not exist: %s\n", destPath)
+		err = os.MkdirAll(destFolder, 0777)
+		if err != nil {
+			fmt.Printf("MkdirAll returned error: %s", err)
+			return false
+		}
+	}
+
 	destFile, err := os.Create(destPath)
 	if err != nil {
 		fmt.Printf("Something went wrong creating target file: %s\n", err)
@@ -91,7 +173,7 @@ func addResourceIfExists(resourceName string, mapName string, targetFolder strin
 		return false
 	}
 
-	fmt.Printf("Added resource %s\n", resourceName)
+	fmt.Printf("Added resource %s\n", path)
 	return true
 }
 
@@ -107,8 +189,8 @@ func deleteFolderAndSubFolders(folder string) {
 	os.RemoveAll(path)
 }
 
-func getArenaFile(mapName string) string {
-	arenaFilePath := fmt.Sprintf("%sscripts/%s.arena", addTrailingSlash(mapName), mapName)
+func getArenaFile(baseq3Folder string, mapName string) string {
+	arenaFilePath := fmt.Sprintf("%sscripts/%s.arena", addTrailingSlash(baseq3Folder), mapName)
 	file, err := os.Open(arenaFilePath)
 
 	if err != nil {
@@ -121,16 +203,16 @@ func getArenaFile(mapName string) string {
 	return fmt.Sprintf("scripts/%s.arena", mapName)
 }
 
-func getLevelshot(mapName string) string {
-	screenshotPath := fmt.Sprintf("%slevelshots/%s", addTrailingSlash(mapName), mapName)
-	jpg := fmt.Sprintf("%s.jpg", screenshotPath)
-	tga := fmt.Sprintf("%s.tga", screenshotPath)
+func getLevelshot(baseq3Folder string, mapName string) string {
+	levelshotsPath := fmt.Sprintf("%slevelshots/%s", addTrailingSlash(baseq3Folder), mapName)
+	jpg := fmt.Sprintf("%s.jpg", levelshotsPath)
+	tga := fmt.Sprintf("%s.tga", levelshotsPath)
 	jpgFile, jpgErr := os.Open(jpg)
 
 	if jpgErr == nil {
 		return fmt.Sprintf("levelshots/%s.jpg", mapName)
 	} else {
-		log.Printf("Failed opening jpg file with path %s, error %s\n", screenshotPath, jpgErr)
+		log.Printf("Failed opening jpg file with path %s, error %s\n", levelshotsPath, jpgErr)
 	}
 	defer jpgFile.Close()
 
@@ -139,10 +221,23 @@ func getLevelshot(mapName string) string {
 	if tgaErr == nil {
 		return fmt.Sprintf("levelshots/%s.tga", mapName)
 	} else {
-		log.Printf("Failed opening tga file with path %s, error %s\n", screenshotPath, tgaErr)
+		log.Printf("Failed opening tga file with path %s, error %s\n", levelshotsPath, tgaErr)
 	}
 
 	defer tgaFile.Close()
 
 	return ""
+}
+
+func extractFolderPaths(fullPath string) string {
+	if strings.Contains(fullPath, ".") {
+		split := strings.Split(fullPath, "/")
+		if len(split) > 0 {
+			split = split[:len(split)-1]
+			fullPath = strings.Join(split, "/")
+		}
+		return fullPath
+	} else {
+		return fullPath
+	}
 }

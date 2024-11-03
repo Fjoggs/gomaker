@@ -2,8 +2,7 @@ package gomaker
 
 import (
 	"bufio"
-	// "fmt"
-	"log"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -36,7 +35,7 @@ func extractTexturesFromUsedShaders(shadersFromMapFile map[string]int, shaderFol
 	}
 
 	if err != nil {
-		log.Fatalf("Failed opening directory %v with path %s, error %s", directory, fsPath, err)
+		fmt.Printf("Failed opening directory %v with path %s, error %s", directory, fsPath, err)
 	}
 	for key, value := range shadersFromMapFile {
 		textures[key] = value
@@ -59,7 +58,7 @@ func parseShaderFile(shadersFromMapFile map[string]int, shaderFileName string, s
 	file, err := os.Open(fsPath)
 
 	if err != nil {
-		log.Fatalf("Failed opening file %v with path %s, error %s", file, shaderFileName, err)
+		fmt.Printf("Failed opening file %v with path %s, error %s", file, shaderFileName, err)
 	}
 	defer file.Close()
 
@@ -101,7 +100,7 @@ func parseShaderFile(shadersFromMapFile map[string]int, shaderFileName string, s
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 	return shaders
 }

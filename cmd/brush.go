@@ -1,7 +1,7 @@
 package gomaker
 
 import (
-	"log"
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -10,7 +10,7 @@ func isBrush(line string) bool {
 	match, err := regexp.MatchString("// brush", strings.ToLower(line))
 
 	if err != nil {
-		log.Fatal("Something went wrong", err)
+		fmt.Println("Something went wrong", err)
 	}
 
 	return match

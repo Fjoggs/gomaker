@@ -1,0 +1,8 @@
+{
+longname	"Test arena file map"
+map	"testmap"
+bots	"Hunter "
+type	"ffa tourney "
+fraglimit	20
+}
+
