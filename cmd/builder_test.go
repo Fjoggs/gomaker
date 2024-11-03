@@ -6,7 +6,8 @@ import (
 )
 
 func TestCreatePk3(t *testing.T) {
-	createPk3("output", "testmap", true)
+	resources := []string{"scripts/testmap.arena", "levelshots/testmap.jpg", "maps/test.map"}
+	createPk3("resources", resources, "testmap", true)
 
 	_, err := os.Stat("output/testmap.pk3")
 
@@ -27,15 +28,13 @@ func TestCreateDirectory(t *testing.T) {
 
 func TestZipOutputFolder(t *testing.T) {
 	createDirectory("output", "")
-	createDirectory("testmap", "output")
-	pk3DirPath := "output/testmap/"
-	createDirectory("env", pk3DirPath)
-	createDirectory("maps", pk3DirPath)
-	createDirectory("textures", pk3DirPath)
-	createDirectory("randomdir", pk3DirPath+"textures")
-	createDirectory("scripts", pk3DirPath)
-	createDirectory("sounds", pk3DirPath)
-	createDirectory("levelshots", pk3DirPath)
+	createDirectory("env", "output")
+	createDirectory("maps", "output")
+	createDirectory("textures", "output")
+	createDirectory("randomdir", "output/textures")
+	createDirectory("scripts", "output")
+	createDirectory("sounds", "output")
+	createDirectory("levelshots", "output")
 
 	err := zipOutputFolder("output", "testmap")
 
@@ -55,11 +54,11 @@ func TestZipOutputFolder(t *testing.T) {
 func TestAddResourceIfExists(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected bool
+		expected string
 	}{
-		{"scripts/testmap.arena", true},
-		{"levelshots/testmap.jpg", true},
-		{"env/something/test.jpg", false},
+		{"scripts/testmap.arena", "output/scripts/testmap.arena"},
+		{"levelshots/testmap.jpg", "output/levelshots/testmap.jpg"},
+		{"env/something/test.jpg", ""},
 	}
 
 	for _, test := range tests {

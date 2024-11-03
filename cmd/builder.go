@@ -11,44 +11,22 @@ import (
 	"strings"
 )
 
-func createPk3(baseq3Folder string, mapName string, overwrite bool) bool {
+func createPk3(baseq3Folder string, resources []string, mapName string, overwrite bool) {
 	if overwrite {
 		deleteFolderAndSubFolders(fmt.Sprintf("%s%s", addTrailingSlash(baseq3Folder), addTrailingSlash(mapName)))
 	}
 
 	createDirectory("output", "")
-	pk3Dir := createDirectory(mapName, "output")
-	if pk3Dir {
-		pk3DirPath := fmt.Sprintf("%s%s", addTrailingSlash(baseq3Folder), addTrailingSlash(mapName))
-		envDir := createDirectory("env", pk3DirPath)
-		mapsDir := createDirectory("maps", pk3DirPath)
-		textureDir := createDirectory("textures", pk3DirPath)
-		textureSubDir := createDirectory("randomdir", pk3DirPath+"textures")
-		scriptsDir := createDirectory("scripts", pk3DirPath)
-		soundsDir := createDirectory("sounds", pk3DirPath)
-		levelshotsDir := createDirectory("levelshots", pk3DirPath)
-
-		fmt.Println("Getting arenafile")
-		arenaFile := getArenaFile(baseq3Folder, mapName)
-		fmt.Println("Getting levelshot")
-		levelshot := getLevelshot(baseq3Folder, mapName)
-
-		fmt.Println("Adding arenafile")
-		addResourceIfExists(baseq3Folder, arenaFile, "output")
-		fmt.Println("Adding levelshot")
-		addResourceIfExists(baseq3Folder, levelshot, "output")
-
-		fmt.Println(pk3Dir)
-		fmt.Println(envDir)
-		fmt.Println(mapsDir)
-		fmt.Println(textureDir)
-		fmt.Println(scriptsDir)
-		fmt.Println(soundsDir)
-		fmt.Println(levelshotsDir)
-		fmt.Println(textureSubDir)
-		return true
+	for _, resource := range resources {
+		fmt.Printf("Checking if resource %s exists\n", resource)
+		addResourceIfExists(baseq3Folder, resource, "output")
 	}
-	return false
+
+	err := zipOutputFolder("output", mapName)
+	// Check actual content as well
+	if err != nil {
+		fmt.Printf("Eyo? %s", err)
+	}
 }
 
 func createDirectory(folderName string, mapName string) bool {
@@ -82,7 +60,7 @@ func zipOutputFolder(outputFolder string, mapName string) error {
 	writer := zip.NewWriter(file)
 	defer writer.Close()
 
-	sourcePath := addTrailingSlash(outputFolder) + mapName
+	sourcePath := addTrailingSlash(outputFolder)
 	return filepath.WalkDir(sourcePath, func(path string, dir fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -93,11 +71,13 @@ func zipOutputFolder(outputFolder string, mapName string) error {
 			return err
 		}
 
-		fmt.Printf("walkdir path %s\n", path)
-		fmt.Printf("walkdir dir %s\n", dir)
-
 		if dir.Name() == mapName {
 			fmt.Println("Omitting map name folder")
+			return nil
+		}
+
+		if dir.Name() == mapName+".pk3" {
+			fmt.Println("Omitting itself (wut)")
 			return nil
 		}
 
@@ -133,23 +113,23 @@ func zipOutputFolder(outputFolder string, mapName string) error {
 	})
 }
 
-func addResourceIfExists(baseq3Folder string, resourcePath string, outputFolder string) bool {
+func addResourceIfExists(baseq3Folder string, resourcePath string, outputFolder string) string {
 	path := fmt.Sprintf("%s%s", addTrailingSlash(baseq3Folder), resourcePath)
 	fmt.Printf("path %s\n", path)
 
 	_, exists := os.Stat(path)
 	if exists != nil {
 		fmt.Printf("Resource does not exist: %s\n", path)
-		return false
+		return ""
 	}
 
 	sourceFile, err := os.Open(path)
 	if err != nil {
 		fmt.Printf("Something went wrong opening source file: %s\n", err)
-		return false
+		return ""
 	}
 
-	destPath := addTrailingSlash(outputFolder) + path
+	destPath := addTrailingSlash(outputFolder) + resourcePath
 	destFolder := extractFolderPaths(destPath)
 	_, exists = os.Stat(destFolder)
 	if exists != nil {
@@ -157,24 +137,24 @@ func addResourceIfExists(baseq3Folder string, resourcePath string, outputFolder 
 		err = os.MkdirAll(destFolder, 0777)
 		if err != nil {
 			fmt.Printf("MkdirAll returned error: %s", err)
-			return false
+			return ""
 		}
 	}
 
 	destFile, err := os.Create(destPath)
 	if err != nil {
 		fmt.Printf("Something went wrong creating target file: %s\n", err)
-		return false
+		return ""
 	}
 
 	_, err = io.Copy(destFile, sourceFile)
 	if err != nil {
 		fmt.Printf("Something went wrong while copying: %s", err)
-		return false
+		return ""
 	}
 
-	fmt.Printf("Added resource %s\n", path)
-	return true
+	fmt.Printf("Added resource %s\n", destPath)
+	return destPath
 }
 
 func deleteFolderAndSubFolders(folder string) {
