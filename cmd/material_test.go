@@ -72,9 +72,9 @@ func TestIsTexture(t *testing.T) {
 		expectedBool    bool
 		expectedTexture string
 	}{
-		{"testmap/test_texture", true, "testmap/test_texture.jpg"},
+		{"testmap/test_texture", true, "textures/testmap/test_texture.jpg"},
 		{"testmap/test_texture_2", false, "testmap/test_texture_2"},
-		{"testmap/test_texture_3", true, "testmap/test_texture_3.tga"},
+		{"testmap/test_texture_3", true, "textures/testmap/test_texture_3.tga"},
 	}
 	baseFolderPath := "resources/"
 	for _, test := range tests {
@@ -116,7 +116,7 @@ func TestSortMaterials(t *testing.T) {
 	}{
 		{
 			map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1},
-			Materials{map[string]int{"testmap/test_texture_3.tga": 1, "testmap/test_texture.jpg": 1}, map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1}},
+			Materials{map[string]int{"textures/testmap/test_texture_3.tga": 1, "textures/testmap/test_texture.jpg": 1}, map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1}},
 		},
 	}
 
@@ -133,19 +133,19 @@ func TestSortMaterials(t *testing.T) {
 	}
 }
 
-func TestAddTextureFileExtension(t *testing.T) {
+func TestAddTexturePathWithExtension(t *testing.T) {
 	tests := []struct {
 		input    map[string]int
 		expected map[string]int
 	}{
 		{
 			map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1},
-			map[string]int{"testmap/test_texture_3.tga": 1, "testmap/test_texture.jpg": 1},
+			map[string]int{"textures/testmap/test_texture_3.tga": 1, "textures/testmap/test_texture.jpg": 1},
 		},
 	}
 
 	for _, test := range tests {
-		actual := addTextureFileExtension(test.input, "resources/")
+		actual := addTexturePathWithExtension(test.input, "resources/")
 		if !reflect.DeepEqual(actual, test.expected) {
 			t.Errorf("Expected %v got %v for %v", test.expected, actual, test.input)
 		}

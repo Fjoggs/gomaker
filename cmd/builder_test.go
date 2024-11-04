@@ -11,10 +11,12 @@ func TestCreatePk3(t *testing.T) {
 
 	_, err := os.Stat("output/testmap.pk3")
 
+	// check content as well
+
 	if err != nil {
 		t.Errorf("PK3 does not exist: %s", err)
 	}
-	deleteFolderAndSubFolders("output")
+	// deleteFolderAndSubFolders("output")
 }
 
 func TestCreateDirectory(t *testing.T) {
@@ -76,7 +78,41 @@ func TestDeleteFolderAndSubFolders(t *testing.T) {
 	deleteFolderAndSubFolders("output/testdelete")
 }
 
-func TestAddArenaFile(t *testing.T) {
+func TestGetBspFile(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"test", ""},
+		{"testmap", "maps/testmap.bsp"},
+	}
+
+	for _, test := range tests {
+		actual := getBspFile("resources", test.input)
+		if actual != test.expected {
+			t.Errorf("Expected %s got %v", test.expected, actual)
+		}
+	}
+}
+
+func TestGetMapFile(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"test", ""},
+		{"testmap", "maps/testmap.map"},
+	}
+
+	for _, test := range tests {
+		actual := getMapFile("resources", test.input)
+		if actual != test.expected {
+			t.Errorf("Expected %s got %v", test.expected, actual)
+		}
+	}
+}
+
+func TestGetArenaFile(t *testing.T) {
 	expected := "scripts/testmap.arena"
 	actual := getArenaFile("resources", "testmap")
 	if actual != expected {

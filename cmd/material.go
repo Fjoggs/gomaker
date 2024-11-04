@@ -2,7 +2,6 @@ package gomaker
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -40,18 +39,15 @@ func isTexture(material string, baseFolderPath string) (bool, string) {
 	jpgFile, jpgErr := os.Open(jpg)
 
 	if jpgErr == nil {
-		return true, fmt.Sprintf("%s.jpg", material)
-	} else {
-		log.Printf("Failed opening jpg file with path %s, error %s", fsPath, jpgErr)
+		return true, fmt.Sprintf("textures/%s.jpg", material)
 	}
+
 	defer jpgFile.Close()
 
 	tgaFile, tgaErr := os.Open(tga)
 
 	if tgaErr == nil {
-		return true, fmt.Sprintf("%s.tga", material)
-	} else {
-		log.Printf("Failed opening tga file with path %s, error %s", fsPath, tgaErr)
+		return true, fmt.Sprintf("textures/%s.tga", material)
 	}
 
 	defer tgaFile.Close()
@@ -87,7 +83,7 @@ func sortMaterials(materials map[string]int, basePath string) Materials {
 	return sorted
 }
 
-func addTextureFileExtension(textures map[string]int, basePath string) map[string]int {
+func addTexturePathWithExtension(textures map[string]int, basePath string) map[string]int {
 	returnValue := map[string]int{}
 	for material := range textures {
 		isT, filePath := isTexture(material, basePath)

@@ -3,6 +3,7 @@ package gomaker
 import (
 	"bufio"
 	"fmt"
+	"maps"
 	"os"
 	"strings"
 	"time"
@@ -22,13 +23,32 @@ func init() {
 
 func main() {
 	start := time.Now()
-	mapName := "test.map"
-	textures, sounds, shaderNames := readMap(mapName, "resources")
+	resources := []string{}
+	mapName := "testmap.map"
+
+	mapFile := getMapFile("resources", "testmap")
+	resources = append(resources, mapFile)
+
+	bspFile := getBspFile("resources", "testmap")
+	resources = append(resources, bspFile)
+
 	arenaFile := getArenaFile("resources", "testmap")
-	fmt.Println(textures)
-	fmt.Println(sounds)
-	fmt.Println(shaderNames)
-	fmt.Println(arenaFile)
+	resources = append(resources, arenaFile)
+
+	levelshot := getLevelshot("resources", "testmap")
+	resources = append(resources, levelshot)
+
+	textures, sounds, shaderNames := readMap(mapName, "resources")
+	for texture := range maps.Keys(textures) {
+		resources = append(resources, texture)
+	}
+	for sound := range maps.Keys(sounds) {
+		resources = append(resources, sound)
+	}
+	resources = append(resources, shaderNames...)
+
+	createPk3("resources", resources, "testmap", false)
+
 	elapsed := time.Since(start)
 	fmt.Println("Elapsed time", elapsed)
 }
@@ -56,7 +76,7 @@ func readMap(mapName string, baseFolderPath string) (map[string]int, map[string]
 
 	textures, shaderNames, _ := extractTexturesFromUsedShaders(materials, "resources/scripts")
 
-	textures = addTextureFileExtension(textures, addTrailingSlash(baseFolderPath))
+	textures = addTexturePathWithExtension(textures, addTrailingSlash(baseFolderPath))
 
 	return textures, sounds, shaderNames
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -23,7 +22,6 @@ func createPk3(baseq3Folder string, resources []string, mapName string, overwrit
 	}
 
 	err := zipOutputFolder("output", mapName)
-	// Check actual content as well
 	if err != nil {
 		fmt.Printf("Eyo? %s", err)
 	}
@@ -169,6 +167,34 @@ func deleteFolderAndSubFolders(folder string) {
 	os.RemoveAll(path)
 }
 
+func getBspFile(baseq3Folder string, mapName string) string {
+	mapFilePath := fmt.Sprintf("%smaps/%s.bsp", addTrailingSlash(baseq3Folder), mapName)
+	file, err := os.Open(mapFilePath)
+
+	if err != nil {
+		fmt.Printf("No .bsp file found: %s", err)
+		return ""
+	}
+
+	defer file.Close()
+	fmt.Printf("Found .bsp file %s.bsp\n", mapName)
+	return fmt.Sprintf("maps/%s.bsp", mapName)
+}
+
+func getMapFile(baseq3Folder string, mapName string) string {
+	mapFilePath := fmt.Sprintf("%smaps/%s.map", addTrailingSlash(baseq3Folder), mapName)
+	file, err := os.Open(mapFilePath)
+
+	if err != nil {
+		fmt.Printf("No .map file found: %s", err)
+		return ""
+	}
+
+	defer file.Close()
+	fmt.Printf("Found .map file %s.map\n", mapName)
+	return fmt.Sprintf("maps/%s.map", mapName)
+}
+
 func getArenaFile(baseq3Folder string, mapName string) string {
 	arenaFilePath := fmt.Sprintf("%sscripts/%s.arena", addTrailingSlash(baseq3Folder), mapName)
 	file, err := os.Open(arenaFilePath)
@@ -191,8 +217,6 @@ func getLevelshot(baseq3Folder string, mapName string) string {
 
 	if jpgErr == nil {
 		return fmt.Sprintf("levelshots/%s.jpg", mapName)
-	} else {
-		log.Printf("Failed opening jpg file with path %s, error %s\n", levelshotsPath, jpgErr)
 	}
 	defer jpgFile.Close()
 
@@ -200,8 +224,6 @@ func getLevelshot(baseq3Folder string, mapName string) string {
 
 	if tgaErr == nil {
 		return fmt.Sprintf("levelshots/%s.tga", mapName)
-	} else {
-		log.Printf("Failed opening tga file with path %s, error %s\n", levelshotsPath, tgaErr)
 	}
 
 	defer tgaFile.Close()

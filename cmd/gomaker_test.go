@@ -1,23 +1,33 @@
 package gomaker
 
 import (
+	"os"
 	"reflect"
 	"testing"
 )
 
 func TestGomaker(t *testing.T) {
 	main()
+
+	_, err := os.Stat("output/testmap.pk3")
+
+	// check content as well
+
+	if err != nil {
+		t.Errorf("PK3 does not exist: %s", err)
+	}
+	// deleteFolderAndSubFolders("output")
 }
 
 func TestReadMap(t *testing.T) {
-	mapName := "test.map"
-	expected := Materials{map[string]int{"testmap/test_texture_3.tga": 1, "testmap/test_texture.jpg": 1, "testmap/test_shader_2.tga": 1, "testmap/test_shader_3.jpg": 1, "testmap/test_model_texture_1.jpg": 1, "testmap/test_model_texture_2.tga": 1}, map[string]int{"testmap/test_texture_3": 2, "testmap/test_texture": 2}}
+	mapName := "testmap.map"
+	expected := Materials{map[string]int{"textures/testmap/test_texture_3.tga": 1, "textures/testmap/test_texture.jpg": 1, "textures/testmap/test_shader_2.tga": 1, "textures/testmap/test_shader_3.jpg": 1, "textures/testmap/test_model_texture_1.jpg": 1, "textures/testmap/test_model_texture_2.tga": 1}, map[string]int{"testmap/test_texture_3": 2, "testmap/test_texture": 2}}
 	expectedSounds := map[string]int{"sound/testmap/sound-file.wav": 1}
 	expectedShaderNames := []string{"testmap/test_shader_2", "testmap/test_shader"}
 	actual, actualSounds, actualShaderNames := readMap(mapName, "resources")
 
 	if !reflect.DeepEqual(actual, expected.textures) {
-		t.Errorf("Expected %v got %v", expected.textures, actual)
+		t.Errorf("Expected %v\n got %v", expected.textures, actual)
 	}
 
 	if !reflect.DeepEqual(actualSounds, expectedSounds) {
