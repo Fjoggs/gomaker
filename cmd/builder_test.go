@@ -1,22 +1,43 @@
 package gomaker
 
 import (
+	"archive/zip"
 	"os"
+	"slices"
 	"testing"
 )
 
 func TestCreatePk3(t *testing.T) {
-	resources := []string{"scripts/testmap.arena", "levelshots/testmap.jpg", "maps/test.map"}
+	resources := []string{"scripts/testmap.arena", "levelshots/testmap.jpg", "maps/testmap.map"}
 	createPk3("resources", resources, "testmap", true)
 
+	expected := []string{"/", "levelshots/", "levelshots/testmap.jpg", "maps/", "maps/testmap.map", "scripts/", "scripts/testmap.arena"}
+
 	_, err := os.Stat("output/testmap.pk3")
-
-	// check content as well
-
 	if err != nil {
 		t.Errorf("PK3 does not exist: %s", err)
 	}
-	// deleteFolderAndSubFolders("output")
+
+	readCloser, err := zip.OpenReader("output/testmap.pk3")
+	if err != nil {
+		t.Errorf("Open reader blew up: %s", err)
+	}
+	defer readCloser.Close()
+
+	numOfPaths := len(readCloser.File)
+	for _, f := range readCloser.File {
+		path := f.Name
+		if !slices.Contains(expected, path) {
+			t.Errorf("Expected %s to be in %v", path, expected)
+		}
+	}
+
+	expectedNumOfPaths := len(expected)
+	if numOfPaths != len(expected) {
+		t.Errorf("Expected number of paths to be %v but got %v", expectedNumOfPaths, numOfPaths)
+	}
+
+	deleteFolderAndSubFolders("output")
 }
 
 func TestCreateDirectory(t *testing.T) {
@@ -38,7 +59,7 @@ func TestZipOutputFolder(t *testing.T) {
 	createDirectory("sounds", "output")
 	createDirectory("levelshots", "output")
 
-	err := zipOutputFolder("output", "testmap")
+	err := zipOutputFolderAsPk3("output", "testmap")
 
 	if err != nil {
 		t.Errorf("Error while creating pk3: %s", err)

@@ -21,7 +21,7 @@ func createPk3(baseq3Folder string, resources []string, mapName string, overwrit
 		addResourceIfExists(baseq3Folder, resource, "output")
 	}
 
-	err := zipOutputFolder("output", mapName)
+	err := zipOutputFolderAsPk3("output", mapName)
 	if err != nil {
 		fmt.Printf("Eyo? %s", err)
 	}
@@ -45,7 +45,7 @@ func createDirectory(folderName string, mapName string) bool {
 	return true
 }
 
-func zipOutputFolder(outputFolder string, mapName string) error {
+func zipOutputFolderAsPk3(outputFolder string, mapName string) error {
 	targetPath := addTrailingSlash(outputFolder) + mapName + ".pk3"
 	file, err := os.Create(targetPath)
 	if err != nil {
