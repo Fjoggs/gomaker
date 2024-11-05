@@ -10,13 +10,31 @@ func TestGetMaterial(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) common/caulk 32 0 0 0.5 0.5 134217728 0 0", ""},
+		{
+			"( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) common/caulk 32 0 0 0.5 0.5 134217728 0 0",
+			"",
+		},
 		{"// Entity 0", ""},
-		{"( 96 80 192 ) ( 240 80 128 ) ( 240 80 192 ) testmap/test_texture 461.2879333496 22.0878295898 -26.5999984741 0.2808699906 0.280872494 134217728 0 0", "testmap/test_texture"},
-		{"( 96 64 192 ) ( 240 64 128 ) ( 96 64 128 ) testmap/test-texture-2 384 256 0 0.25 0.25 134217728 0 0", "testmap/test-texture-2"},
-		{"( 216 -64 120 ) ( 200 -192 128 ) ( 216 -192 120 ) common/caulk 0 32 0 0.5 0.5 134217728 0 0", ""},
-		{"( 112 -64 192 ) ( 128 -192 184 ) ( 112 -192 192 ) testmap_a1/23-texture 384 0 0 0.25 0.25 134217728 0 0", "testmap_a1/23-texture"},
-		{"( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) testmap-b5/texture2 32 0 0 0.5 0.5 134217728 0 0", "testmap-b5/texture2"},
+		{
+			"( 96 80 192 ) ( 240 80 128 ) ( 240 80 192 ) testmap/test_texture 461.2879333496 22.0878295898 -26.5999984741 0.2808699906 0.280872494 134217728 0 0",
+			"testmap/test_texture",
+		},
+		{
+			"( 96 64 192 ) ( 240 64 128 ) ( 96 64 128 ) testmap/test-texture-2 384 256 0 0.25 0.25 134217728 0 0",
+			"testmap/test-texture-2",
+		},
+		{
+			"( 216 -64 120 ) ( 200 -192 128 ) ( 216 -192 120 ) common/caulk 0 32 0 0.5 0.5 134217728 0 0",
+			"",
+		},
+		{
+			"( 112 -64 192 ) ( 128 -192 184 ) ( 112 -192 192 ) testmap_a1/23-texture 384 0 0 0.25 0.25 134217728 0 0",
+			"testmap_a1/23-texture",
+		},
+		{
+			"( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) testmap-b5/texture2 32 0 0 0.5 0.5 134217728 0 0",
+			"testmap-b5/texture2",
+		},
 		{"}", ""},
 	}
 	for _, test := range tests {
@@ -115,8 +133,22 @@ func TestSortMaterials(t *testing.T) {
 		expected Materials
 	}{
 		{
-			map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1},
-			Materials{map[string]int{"textures/testmap/test_texture_3.tga": 1, "textures/testmap/test_texture.jpg": 1}, map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1}},
+			map[string]int{
+				"testmap/test_texture_3": 1,
+				"testmap/test_shader":    1,
+				"testmap/test_texture":   1,
+			},
+			Materials{
+				map[string]int{
+					"textures/testmap/test_texture_3.tga": 1,
+					"textures/testmap/test_texture.jpg":   1,
+				},
+				map[string]int{
+					"testmap/test_texture_3": 1,
+					"testmap/test_shader":    1,
+					"testmap/test_texture":   1,
+				},
+			},
 		},
 	}
 
@@ -124,7 +156,12 @@ func TestSortMaterials(t *testing.T) {
 		actual := sortMaterials(test.input, "resources/")
 		equalTextures := reflect.DeepEqual(actual.textures, test.expected.textures)
 		if !equalTextures {
-			t.Errorf("Expected %v got %v for %v", test.expected.textures, actual.textures, test.input)
+			t.Errorf(
+				"Expected %v got %v for %v",
+				test.expected.textures,
+				actual.textures,
+				test.input,
+			)
 		}
 		equalShaders := reflect.DeepEqual(actual.shaders, test.expected.shaders)
 		if !equalShaders {
@@ -139,8 +176,15 @@ func TestAddTexturePathWithExtension(t *testing.T) {
 		expected map[string]int
 	}{
 		{
-			map[string]int{"testmap/test_texture_3": 1, "testmap/test_shader": 1, "testmap/test_texture": 1},
-			map[string]int{"textures/testmap/test_texture_3.tga": 1, "textures/testmap/test_texture.jpg": 1},
+			map[string]int{
+				"testmap/test_texture_3": 1,
+				"testmap/test_shader":    1,
+				"testmap/test_texture":   1,
+			},
+			map[string]int{
+				"textures/testmap/test_texture_3.tga": 1,
+				"textures/testmap/test_texture.jpg":   1,
+			},
 		},
 	}
 

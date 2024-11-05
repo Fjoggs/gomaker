@@ -14,7 +14,10 @@ type Shader struct {
 	textures map[string]int
 }
 
-func extractTexturesFromUsedShaders(shadersFromMapFile map[string]int, shaderFolderPath string) (map[string]int, []string, []string) {
+func extractTexturesFromUsedShaders(
+	shadersFromMapFile map[string]int,
+	shaderFolderPath string,
+) (map[string]int, []string, []string) {
 	shaderFiles := []string{}
 	textures := map[string]int{}
 	shaderNames := []string{}
@@ -43,7 +46,11 @@ func extractTexturesFromUsedShaders(shadersFromMapFile map[string]int, shaderFol
 	return textures, shaderNames, shaderFiles
 }
 
-func combineTexturesFromShaders(shaders []Shader, textures map[string]int, shaderNames []string) (map[string]int, []string) {
+func combineTexturesFromShaders(
+	shaders []Shader,
+	textures map[string]int,
+	shaderNames []string,
+) (map[string]int, []string) {
 	for _, shader := range shaders {
 		shaderNames = append(shaderNames, shader.name)
 		for texture, count := range shader.textures {
@@ -53,7 +60,11 @@ func combineTexturesFromShaders(shaders []Shader, textures map[string]int, shade
 	return textures, shaderNames
 }
 
-func parseShaderFile(shadersFromMapFile map[string]int, shaderFileName string, shaderFolderPath string) []Shader {
+func parseShaderFile(
+	shadersFromMapFile map[string]int,
+	shaderFileName string,
+	shaderFolderPath string,
+) []Shader {
 	fsPath := addTrailingSlash(shaderFolderPath) + shaderFileName
 	file, err := os.Open(fsPath)
 

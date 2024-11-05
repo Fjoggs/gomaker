@@ -38,13 +38,20 @@ func main() {
 	levelshot := getLevelshot("resources", "testmap")
 	resources = append(resources, levelshot)
 
-	textures, sounds, shaderNames := readMap(mapName, "resources")
+	textures, sounds, shaderNames, shaderFiles := readMap(mapName, "resources")
+
 	for texture := range maps.Keys(textures) {
 		resources = append(resources, texture)
 	}
+
 	for sound := range maps.Keys(sounds) {
 		resources = append(resources, sound)
 	}
+
+	for _, shaderFile := range shaderFiles {
+		resources = append(resources, "scripts/"+shaderFile)
+	}
+
 	resources = append(resources, shaderNames...)
 
 	createPk3("resources", resources, "testmap", false)
@@ -53,7 +60,10 @@ func main() {
 	fmt.Println("Elapsed time", elapsed)
 }
 
-func readMap(mapName string, baseFolderPath string) (map[string]int, map[string]int, []string) {
+func readMap(
+	mapName string,
+	baseFolderPath string,
+) (map[string]int, map[string]int, []string, []string) {
 	materials := map[string]int{}
 	sounds := map[string]int{}
 	file, err := os.Open(addTrailingSlash(baseFolderPath) + "maps/" + mapName)
@@ -74,11 +84,14 @@ func readMap(mapName string, baseFolderPath string) (map[string]int, map[string]
 		fmt.Println(err)
 	}
 
-	textures, shaderNames, _ := extractTexturesFromUsedShaders(materials, "resources/scripts")
+	textures, shaderNames, shaderFiles := extractTexturesFromUsedShaders(
+		materials,
+		"resources/scripts",
+	)
 
 	textures = addTexturePathWithExtension(textures, addTrailingSlash(baseFolderPath))
 
-	return textures, sounds, shaderNames
+	return textures, sounds, shaderNames, shaderFiles
 }
 
 func addMaterials(line string, materials map[string]int) {

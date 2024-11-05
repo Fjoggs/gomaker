@@ -10,10 +10,16 @@ func TestIsEntity(t *testing.T) {
 		input    string
 		expected bool
 	}{
-		{"( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) common/caulk 32 0 0 0.5 0.5 134217728 0 0", false},
+		{
+			"( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) common/caulk 32 0 0 0.5 0.5 134217728 0 0",
+			false,
+		},
 		{"// Entity 0", true},
 		{"// Brush 1337", false},
-		{"( 96 80 192 ) ( 240 80 128 ) ( 240 80 192 ) testmap/test_texture 461.2879333496 22.0878295898 -26.5999984741 0.2808699906 0.280872494 134217728 0 0", false},
+		{
+			"( 96 80 192 ) ( 240 80 128 ) ( 240 80 192 ) testmap/test_texture 461.2879333496 22.0878295898 -26.5999984741 0.2808699906 0.280872494 134217728 0 0",
+			false,
+		},
 		{"// entity 1", true},
 		{"// brush 0", false},
 	}
@@ -135,7 +141,10 @@ func TestParseModel(t *testing.T) {
 		expected map[string]int
 	}{
 		{"resources/models/test-model.ase", map[string]int{"testmap/test_model_texture_1": 1}},
-		{"resources/models/test-model-2.ase", map[string]int{"texture_test/concrete_tile": 1, "texture_test/texture-2": 1}},
+		{
+			"resources/models/test-model-2.ase",
+			map[string]int{"texture_test/concrete_tile": 1, "texture_test/texture-2": 1},
+		},
 		{"resources/models/test-material.mtl", map[string]int{"testmap/test_model_texture_2": 1}},
 		{"resources/models/test-material-2.mtl", map[string]int{"texture_test/concrete_tile": 1}},
 	}
@@ -152,8 +161,14 @@ func TestObjTexture(t *testing.T) {
 		path     string
 		expected string
 	}{
-		{`map_Kd /long/path/for/some/reason/textures/testmap/test_texture.jpg`, "testmap/test_texture"},
-		{`map_Kd \slash\wrong\way\textures\texture_test\concrete_tile.jpg`, "texture_test/concrete_tile"},
+		{
+			`map_Kd /long/path/for/some/reason/textures/testmap/test_texture.jpg`,
+			"testmap/test_texture",
+		},
+		{
+			`map_Kd \slash\wrong\way\textures\texture_test\concrete_tile.jpg`,
+			"texture_test/concrete_tile",
+		},
 	}
 	for _, test := range tests {
 		actual := objTexture(test.path)

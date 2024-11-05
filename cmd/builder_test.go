@@ -11,7 +11,15 @@ func TestCreatePk3(t *testing.T) {
 	resources := []string{"scripts/testmap.arena", "levelshots/testmap.jpg", "maps/testmap.map"}
 	createPk3("resources", resources, "testmap", true)
 
-	expected := []string{"/", "levelshots/", "levelshots/testmap.jpg", "maps/", "maps/testmap.map", "scripts/", "scripts/testmap.arena"}
+	expected := []string{
+		"/",
+		"levelshots/",
+		"levelshots/testmap.jpg",
+		"maps/",
+		"maps/testmap.map",
+		"scripts/",
+		"scripts/testmap.arena",
+	}
 
 	_, err := os.Stat("output/testmap.pk3")
 	if err != nil {

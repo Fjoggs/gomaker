@@ -12,7 +12,9 @@ import (
 
 func createPk3(baseq3Folder string, resources []string, mapName string, overwrite bool) {
 	if overwrite {
-		deleteFolderAndSubFolders(fmt.Sprintf("%s%s", addTrailingSlash(baseq3Folder), addTrailingSlash(mapName)))
+		deleteFolderAndSubFolders(
+			fmt.Sprintf("%s%s", addTrailingSlash(baseq3Folder), addTrailingSlash(mapName)),
+		)
 	}
 
 	createDirectory("output", "")

@@ -1,30 +1,80 @@
 package gomaker
 
 import (
+	"archive/zip"
 	"os"
 	"reflect"
+	"slices"
 	"testing"
 )
 
 func TestGomaker(t *testing.T) {
 	main()
+	expected := []string{
+		"/",
+		"levelshots/",
+		"levelshots/testmap.jpg",
+		"maps/",
+		"maps/testmap.bsp",
+		"maps/testmap.map",
+		"scripts/",
+		"scripts/testmap.arena",
+		"scripts/testmap.shader",
+		"scripts/test_shader_2.shader",
+		"sound/",
+		"sound/testmap/sound-file.wav",
+		"textures/",
+		"textures/testmap/test_model_texture_1.jpg",
+		"textures/testmap/test_model_texture_2.tga",
+		"textures/testmap/test_shader_2.tga",
+		"textures/testmap/test_shader_3.jpg",
+		"textures/testmap/test_texture.jpg",
+		"textures/testmap/test_texture_3.tga",
+	}
 
 	_, err := os.Stat("output/testmap.pk3")
-
-	// check content as well
-
 	if err != nil {
 		t.Errorf("PK3 does not exist: %s", err)
 	}
-	// deleteFolderAndSubFolders("output")
+
+	readCloser, err := zip.OpenReader("output/testmap.pk3")
+	if err != nil {
+		t.Errorf("Open reader blew up: %s", err)
+	}
+	defer readCloser.Close()
+
+	numOfPaths := len(readCloser.File)
+	for _, f := range readCloser.File {
+		path := f.Name
+		if !slices.Contains(expected, path) {
+			t.Errorf("Expected %s to be in %v", path, expected)
+		}
+	}
+
+	expectedNumOfPaths := len(expected)
+	if numOfPaths != len(expected) {
+		t.Errorf("Expected number of paths to be %v but got %v", expectedNumOfPaths, numOfPaths)
+	}
+
+	deleteFolderAndSubFolders("output")
 }
 
 func TestReadMap(t *testing.T) {
 	mapName := "testmap.map"
-	expected := Materials{map[string]int{"textures/testmap/test_texture_3.tga": 1, "textures/testmap/test_texture.jpg": 1, "textures/testmap/test_shader_2.tga": 1, "textures/testmap/test_shader_3.jpg": 1, "textures/testmap/test_model_texture_1.jpg": 1, "textures/testmap/test_model_texture_2.tga": 1}, map[string]int{"testmap/test_texture_3": 2, "testmap/test_texture": 2}}
+	expected := Materials{
+		map[string]int{
+			"textures/testmap/test_texture_3.tga":       1,
+			"textures/testmap/test_texture.jpg":         1,
+			"textures/testmap/test_shader_2.tga":        1,
+			"textures/testmap/test_shader_3.jpg":        1,
+			"textures/testmap/test_model_texture_1.jpg": 1,
+			"textures/testmap/test_model_texture_2.tga": 1,
+		},
+		map[string]int{"testmap/test_texture_3": 2, "testmap/test_texture": 2},
+	}
 	expectedSounds := map[string]int{"sound/testmap/sound-file.wav": 1}
 	expectedShaderNames := []string{"testmap/test_shader_2", "testmap/test_shader"}
-	actual, actualSounds, actualShaderNames := readMap(mapName, "resources")
+	actual, actualSounds, actualShaderNames, _ := readMap(mapName, "resources")
 
 	if !reflect.DeepEqual(actual, expected.textures) {
 		t.Errorf("Expected %v\n got %v", expected.textures, actual)
@@ -42,7 +92,11 @@ func TestReadMap(t *testing.T) {
 func TestAddMaterials(t *testing.T) {
 	line := "( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) testmap/test_shader_3 32 0 0 0.5 0.5 134217728 0 0"
 	materials := map[string]int{"testmap/test_texture_3": 1, "testmap/test_texture": 1}
-	expected := map[string]int{"testmap/test_texture_3": 1, "testmap/test_texture": 1, "testmap/test_shader_3": 1}
+	expected := map[string]int{
+		"testmap/test_texture_3": 1,
+		"testmap/test_texture":   1,
+		"testmap/test_shader_3":  1,
+	}
 
 	addMaterials(line, materials)
 	if !reflect.DeepEqual(materials, expected) {
@@ -53,7 +107,10 @@ func TestAddMaterials(t *testing.T) {
 func TestAddSounds(t *testing.T) {
 	line := `"noise" "sound/testmap/sound-file.wav"`
 	sounds := map[string]int{"sound/testmap/sound-file-2.wav": 1}
-	expected := map[string]int{"sound/testmap/sound-file-2.wav": 1, "sound/testmap/sound-file.wav": 1}
+	expected := map[string]int{
+		"sound/testmap/sound-file-2.wav": 1,
+		"sound/testmap/sound-file.wav":   1,
+	}
 
 	addSounds(line, sounds)
 	if !reflect.DeepEqual(sounds, expected) {
@@ -67,7 +124,10 @@ func TestGetMaterials(t *testing.T) {
 		input    string
 		expected map[string]int
 	}{
-		{"( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) testmap/texture 32 0 0 0.5 0.5 134217728 0 0", map[string]int{"testmap/texture": 1}},
+		{
+			"( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) testmap/texture 32 0 0 0.5 0.5 134217728 0 0",
+			map[string]int{"testmap/texture": 1},
+		},
 		{"// Entity 0", emptyMap},
 		{"{", emptyMap},
 		{`"classname" "misc_model"`, emptyMap},
@@ -77,7 +137,10 @@ func TestGetMaterials(t *testing.T) {
 		{`"_remap" "*;textures/testmap/test_texture"`, emptyMap},
 		{"}", map[string]int{"testmap/test_texture": 1}},
 		{"// Brush 1337", emptyMap},
-		{"( 96 80 192 ) ( 240 80 128 ) ( 240 80 192 ) testmap/test_texture 461.2879333496 22.0878295898 -26.5999984741 0.2808699906 0.280872494 134217728 0 0", map[string]int{"testmap/test_texture": 1}},
+		{
+			"( 96 80 192 ) ( 240 80 128 ) ( 240 80 192 ) testmap/test_texture 461.2879333496 22.0878295898 -26.5999984741 0.2808699906 0.280872494 134217728 0 0",
+			map[string]int{"testmap/test_texture": 1},
+		},
 		{"// entity 1", emptyMap},
 		{"{", emptyMap},
 		{"}", emptyMap},
@@ -101,7 +164,13 @@ func TestGetMaterials(t *testing.T) {
 		actual := getMaterials(test.input)
 
 		if !reflect.DeepEqual(actual, test.expected) {
-			t.Errorf("Expected %v got %v for %s, index %d", test.expected, actual, test.input, index)
+			t.Errorf(
+				"Expected %v got %v for %s, index %d",
+				test.expected,
+				actual,
+				test.input,
+				index,
+			)
 		}
 	}
 }
@@ -111,10 +180,16 @@ func TestHandleBrush(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) testmap/texture 32 0 0 0.5 0.5 134217728 0 0", "testmap/texture"},
+		{
+			"( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) testmap/texture 32 0 0 0.5 0.5 134217728 0 0",
+			"testmap/texture",
+		},
 		{"// Entity 0", ""},
 		{"// Brush 1337", ""},
-		{"( 96 80 192 ) ( 240 80 128 ) ( 240 80 192 ) testmap/test_texture 461.2879333496 22.0878295898 -26.5999984741 0.2808699906 0.280872494 134217728 0 0", "testmap/test_texture"},
+		{
+			"( 96 80 192 ) ( 240 80 128 ) ( 240 80 192 ) testmap/test_texture 461.2879333496 22.0878295898 -26.5999984741 0.2808699906 0.280872494 134217728 0 0",
+			"testmap/test_texture",
+		},
 		{"// entity 1", ""},
 		{"// brush 0", ""},
 	}
@@ -197,12 +272,20 @@ func TestMergeMaps(t *testing.T) {
 		{
 			map[string]int{"testmap/test_model_texture_3": 1},
 			map[string]int{"testmap/test_model_texture_1": 1, "testmap/test_model_texture_2": 1},
-			map[string]int{"testmap/test_model_texture_1": 1, "testmap/test_model_texture_2": 1, "testmap/test_model_texture_3": 1},
+			map[string]int{
+				"testmap/test_model_texture_1": 1,
+				"testmap/test_model_texture_2": 1,
+				"testmap/test_model_texture_3": 1,
+			},
 		},
 		{
 			map[string]int{"testmap/test_model_texture_1": 1, "testmap/test_model_texture_2": 1},
 			map[string]int{"testmap/test_model_texture_3": 1},
-			map[string]int{"testmap/test_model_texture_1": 1, "testmap/test_model_texture_2": 1, "testmap/test_model_texture_3": 1},
+			map[string]int{
+				"testmap/test_model_texture_1": 1,
+				"testmap/test_model_texture_2": 1,
+				"testmap/test_model_texture_3": 1,
+			},
 		},
 	}
 

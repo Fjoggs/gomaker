@@ -10,7 +10,10 @@ func TestGetSound(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) testmap/texture 32 0 0 0.5 0.5 134217728 0 0", ""},
+		{
+			"( 104 400 176 ) ( 112 400 192 ) ( 104 272 176 ) testmap/texture 32 0 0 0.5 0.5 134217728 0 0",
+			"",
+		},
 		{"// Entity 0", ""},
 		{"{", ""},
 		{"// entity 1", ""},
