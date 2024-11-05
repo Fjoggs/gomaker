@@ -89,6 +89,7 @@ func TestAddResourceIfExists(t *testing.T) {
 		{"scripts/testmap.arena", "output/scripts/testmap.arena"},
 		{"levelshots/testmap.jpg", "output/levelshots/testmap.jpg"},
 		{"env/something/test.jpg", ""},
+		{"maps/testmap/lm_0000.tga", "output/maps/testmap/lm_0000.tga"},
 	}
 
 	for _, test := range tests {
@@ -104,6 +105,40 @@ func TestAddResourceIfExists(t *testing.T) {
 func TestDeleteFolderAndSubFolders(t *testing.T) {
 	createDirectory("testdelete", "output/")
 	deleteFolderAndSubFolders("output/testdelete")
+}
+
+func TestGetCfgFile(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"test", ""},
+		{"testmap", "cfg-maps/testmap.cfg"},
+	}
+
+	for _, test := range tests {
+		actual := getCfgFile("resources", test.input)
+		if actual != test.expected {
+			t.Errorf("Expected %s got %v", test.expected, actual)
+		}
+	}
+}
+
+func TestGetReadme(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"test", ""},
+		{"testmap", "testmap.txt"},
+	}
+
+	for _, test := range tests {
+		actual := getReadme("resources", test.input)
+		if actual != test.expected {
+			t.Errorf("Expected %s got %v", test.expected, actual)
+		}
+	}
 }
 
 func TestGetBspFile(t *testing.T) {
@@ -136,6 +171,41 @@ func TestGetMapFile(t *testing.T) {
 		actual := getMapFile("resources", test.input)
 		if actual != test.expected {
 			t.Errorf("Expected %s got %v", test.expected, actual)
+		}
+	}
+}
+
+func TestGetExternalLightmaps(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []string
+	}{
+		{"test", []string{}},
+		{
+			"testmap",
+			[]string{
+				"maps/testmap/lm_0000.tga",
+				"maps/testmap/lm_0001.tga",
+				"maps/testmap/lm_0002.tga",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		actualLightmaps := getExternalLightmaps("resources", test.input)
+		actualLength := len(actualLightmaps)
+		expectedLength := len(test.expected)
+		if actualLength != expectedLength {
+			t.Errorf(
+				"Expected lightmap slice length to be %v but was %v",
+				expectedLength,
+				actualLength,
+			)
+		}
+		for index, actual := range actualLightmaps {
+			if actual != test.expected[index] {
+				t.Errorf("Expected %s got %v", test.expected[index], actual)
+			}
 		}
 	}
 }

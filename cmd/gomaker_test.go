@@ -12,11 +12,17 @@ func TestGomaker(t *testing.T) {
 	main()
 	expected := []string{
 		"/",
+		"testmap.txt",
+		"cfg-maps/",
+		"cfg-maps/testmap.cfg",
 		"levelshots/",
 		"levelshots/testmap.jpg",
 		"maps/",
 		"maps/testmap.bsp",
 		"maps/testmap.map",
+		"maps/testmap/lm_0000.tga",
+		"maps/testmap/lm_0001.tga",
+		"maps/testmap/lm_0002.tga",
 		"scripts/",
 		"scripts/testmap.arena",
 		"scripts/testmap.shader",
@@ -56,7 +62,7 @@ func TestGomaker(t *testing.T) {
 		t.Errorf("Expected number of paths to be %v but got %v", expectedNumOfPaths, numOfPaths)
 	}
 
-	deleteFolderAndSubFolders("output")
+	// deleteFolderAndSubFolders("output")
 }
 
 func TestReadMap(t *testing.T) {

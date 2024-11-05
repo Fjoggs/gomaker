@@ -28,6 +28,12 @@ func main() {
 	resources := []string{}
 	mapName := "testmap.map"
 
+	readme := getReadme("resources", "testmap")
+	resources = append(resources, readme)
+
+	cfg := getCfgFile("resources", "testmap")
+	resources = append(resources, cfg)
+
 	mapFile := getMapFile("resources", "testmap")
 	resources = append(resources, mapFile)
 
@@ -39,6 +45,9 @@ func main() {
 
 	levelshot := getLevelshot("resources", "testmap")
 	resources = append(resources, levelshot)
+
+	lightmaps := getExternalLightmaps("resources", "testmap")
+	fmt.Printf("Lightmaps %v", lightmaps)
 
 	textures, sounds, shaderNames, shaderFiles := readMap(mapName, "resources")
 
@@ -52,6 +61,10 @@ func main() {
 
 	for _, shaderFile := range shaderFiles {
 		resources = append(resources, "scripts/"+shaderFile)
+	}
+
+	for _, lightmap := range lightmaps {
+		resources = append(resources, lightmap)
 	}
 
 	resources = append(resources, shaderNames...)

@@ -169,6 +169,32 @@ func deleteFolderAndSubFolders(folder string) {
 	os.RemoveAll(path)
 }
 
+func getCfgFile(baseq3Folder string, mapName string) string {
+	mapFilePath := fmt.Sprintf("%scfg-maps/%s.cfg", addTrailingSlash(baseq3Folder), mapName)
+	file, err := os.Open(mapFilePath)
+	if err != nil {
+		fmt.Printf("No .cfg file found: %s", err)
+		return ""
+	}
+
+	defer file.Close()
+	fmt.Printf("Found .cfg file %s.cfg\n", mapName)
+	return fmt.Sprintf("cfg-maps/%s.cfg", mapName)
+}
+
+func getReadme(baseq3Folder string, mapName string) string {
+	mapFilePath := fmt.Sprintf("%s%s.txt", addTrailingSlash(baseq3Folder), mapName)
+	file, err := os.Open(mapFilePath)
+	if err != nil {
+		fmt.Printf("No .txt file found: %s", err)
+		return ""
+	}
+
+	defer file.Close()
+	fmt.Printf("Found .txt file %s.txt\n", mapName)
+	return fmt.Sprintf("%s.txt", mapName)
+}
+
 func getBspFile(baseq3Folder string, mapName string) string {
 	mapFilePath := fmt.Sprintf("%smaps/%s.bsp", addTrailingSlash(baseq3Folder), mapName)
 	file, err := os.Open(mapFilePath)
@@ -193,6 +219,38 @@ func getMapFile(baseq3Folder string, mapName string) string {
 	defer file.Close()
 	fmt.Printf("Found .map file %s.map\n", mapName)
 	return fmt.Sprintf("maps/%s.map", mapName)
+}
+
+func getExternalLightmaps(baseq3Folder string, mapName string) []string {
+	mapFilePath := fmt.Sprintf("%smaps/%s/", addTrailingSlash(baseq3Folder), mapName)
+	file, err := os.Open(mapFilePath)
+	lightmaps := []string{}
+	if err != nil {
+		fmt.Printf("No external lightmap folder found: %s\n", err)
+		return lightmaps
+	}
+
+	err = filepath.WalkDir(mapFilePath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if mapName == d.Name() {
+			fmt.Printf("Ignoring root folder %s", d.Name())
+			return err
+		}
+
+		lightmaps = append(lightmaps, fmt.Sprintf("maps/%s/%s", mapName, d.Name()))
+		return err
+	})
+	if err != nil {
+		fmt.Printf("an error occured while walking %s\n", err)
+		return lightmaps
+	}
+
+	defer file.Close()
+	fmt.Printf("Found lightmaps %s\n", lightmaps)
+	return lightmaps
 }
 
 func getArenaFile(baseq3Folder string, mapName string) string {
