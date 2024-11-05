@@ -63,10 +63,7 @@ func main() {
 		resources = append(resources, "scripts/"+shaderFile)
 	}
 
-	for _, lightmap := range lightmaps {
-		resources = append(resources, lightmap)
-	}
-
+	resources = append(resources, lightmaps...)
 	resources = append(resources, shaderNames...)
 
 	createPk3("resources", resources, "testmap", false)
