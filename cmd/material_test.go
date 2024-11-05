@@ -66,6 +66,7 @@ func TestIsCustomMaterial(t *testing.T) {
 		}
 	}
 }
+
 func TestFormatPath(t *testing.T) {
 	tests := []struct {
 		input    string

@@ -172,7 +172,6 @@ func deleteFolderAndSubFolders(folder string) {
 func getBspFile(baseq3Folder string, mapName string) string {
 	mapFilePath := fmt.Sprintf("%smaps/%s.bsp", addTrailingSlash(baseq3Folder), mapName)
 	file, err := os.Open(mapFilePath)
-
 	if err != nil {
 		fmt.Printf("No .bsp file found: %s", err)
 		return ""
@@ -186,7 +185,6 @@ func getBspFile(baseq3Folder string, mapName string) string {
 func getMapFile(baseq3Folder string, mapName string) string {
 	mapFilePath := fmt.Sprintf("%smaps/%s.map", addTrailingSlash(baseq3Folder), mapName)
 	file, err := os.Open(mapFilePath)
-
 	if err != nil {
 		fmt.Printf("No .map file found: %s", err)
 		return ""
@@ -200,7 +198,6 @@ func getMapFile(baseq3Folder string, mapName string) string {
 func getArenaFile(baseq3Folder string, mapName string) string {
 	arenaFilePath := fmt.Sprintf("%sscripts/%s.arena", addTrailingSlash(baseq3Folder), mapName)
 	file, err := os.Open(arenaFilePath)
-
 	if err != nil {
 		fmt.Printf("No arena file found: %s", err)
 		return ""

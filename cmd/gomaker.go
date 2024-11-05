@@ -14,8 +14,10 @@ type Materials struct {
 	shaders  map[string]int
 }
 
-var entityLines []string
-var parsingEntity bool
+var (
+	entityLines   []string
+	parsingEntity bool
+)
 
 func init() {
 	parsingEntity = false
@@ -67,7 +69,6 @@ func readMap(
 	materials := map[string]int{}
 	sounds := map[string]int{}
 	file, err := os.Open(addTrailingSlash(baseFolderPath) + "maps/" + mapName)
-
 	if err != nil {
 		fmt.Println(err)
 	}

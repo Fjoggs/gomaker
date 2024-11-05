@@ -95,7 +95,6 @@ func TestParseEntity(t *testing.T) {
 			t.Errorf("Expected %v got %v for %v", test.expected, actual, test.input)
 		}
 	}
-
 }
 
 func TestModelPath(t *testing.T) {
@@ -115,6 +114,7 @@ func TestModelPath(t *testing.T) {
 		}
 	}
 }
+
 func TestRemapTexture(t *testing.T) {
 	tests := []struct {
 		input    string

@@ -68,7 +68,6 @@ func TestZipOutputFolder(t *testing.T) {
 	createDirectory("levelshots", "output")
 
 	err := zipOutputFolderAsPk3("output", "testmap")
-
 	if err != nil {
 		t.Errorf("Error while creating pk3: %s", err)
 	}
@@ -166,6 +165,7 @@ func TestGetLevelshot(t *testing.T) {
 		}
 	}
 }
+
 func TestExtractFolderPaths(t *testing.T) {
 	tests := []struct {
 		input    string

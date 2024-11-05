@@ -10,7 +10,6 @@ import (
 
 func isEntity(line string) bool {
 	match, err := regexp.MatchString("// entity", strings.ToLower(line))
-
 	if err != nil {
 		fmt.Println("Something went wrong", err)
 	}
@@ -58,7 +57,6 @@ func modelPath(line string) string {
 func parseModel(modelPath string) map[string]int {
 	textures := map[string]int{}
 	file, err := os.Open(modelPath)
-
 	if err != nil {
 		fmt.Printf("Failed opening file %v with path %s, error %s", file, modelPath, err)
 	}

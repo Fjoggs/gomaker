@@ -67,7 +67,6 @@ func parseShaderFile(
 ) []Shader {
 	fsPath := addTrailingSlash(shaderFolderPath) + shaderFileName
 	file, err := os.Open(fsPath)
-
 	if err != nil {
 		fmt.Printf("Failed opening file %v with path %s, error %s", file, shaderFileName, err)
 	}
