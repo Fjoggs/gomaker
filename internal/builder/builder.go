@@ -14,7 +14,7 @@ import (
 	"gomaker/internal/parser"
 )
 
-func MakePk3(mapName string, basePath string) {
+func MakePk3(mapName string, basePath string) string {
 	resources := []string{}
 
 	readme := GetReadme(basePath, mapName)
@@ -54,10 +54,11 @@ func MakePk3(mapName string, basePath string) {
 	resources = append(resources, lightmaps...)
 	resources = append(resources, shaderNames...)
 
-	CreatePk3(basePath, resources, mapName, false)
+	pk3Path := CreatePk3(basePath, resources, mapName, false)
+	return pk3Path
 }
 
-func CreatePk3(baseq3Folder string, resources []string, mapName string, overwrite bool) {
+func CreatePk3(baseq3Folder string, resources []string, mapName string, overwrite bool) string {
 	if overwrite {
 		DeleteFolderAndSubFolders(
 			fmt.Sprintf(
@@ -74,10 +75,11 @@ func CreatePk3(baseq3Folder string, resources []string, mapName string, overwrit
 		AddResourceIfExists(baseq3Folder, resource, "output")
 	}
 
-	err := ZipOutputFolderAsPk3("output", mapName)
+	pk3Path, err := ZipOutputFolderAsPk3("output", mapName)
 	if err != nil {
 		fmt.Printf("Eyo? %s", err)
 	}
+	return pk3Path
 }
 
 func CreateDirectory(folderName string, mapName string) bool {
@@ -98,12 +100,18 @@ func CreateDirectory(folderName string, mapName string) bool {
 	return true
 }
 
-func ZipOutputFolderAsPk3(outputFolder string, mapName string) error {
-	targetPath := material.AddTrailingSlash(outputFolder) + mapName + ".pk3"
-	file, err := os.Create(targetPath)
+func ZipOutputFolderAsPk3(outputFolder string, mapName string) (string, error) {
+	ex, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	cwd := filepath.Dir(ex)
+	fmt.Printf("cwd %s\n", cwd)
+	pk3Path := material.AddTrailingSlash(cwd) + mapName + ".pk3"
+	file, err := os.Create(pk3Path)
 	if err != nil {
 		fmt.Printf("Error occured while creating zip: %s", err)
-		return err
+		return "", err
 	}
 
 	defer file.Close()
@@ -112,56 +120,63 @@ func ZipOutputFolderAsPk3(outputFolder string, mapName string) error {
 	defer writer.Close()
 
 	sourcePath := material.AddTrailingSlash(outputFolder)
-	return filepath.WalkDir(sourcePath, func(path string, dir fs.DirEntry, err error) error {
-		if err != nil {
+	err = filepath.WalkDir(
+		sourcePath,
+		func(path string, dir fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+
+			fileInfo, err := dir.Info()
+			if err != nil {
+				return err
+			}
+
+			if dir.Name() == mapName {
+				fmt.Println("Omitting map name folder")
+				return nil
+			}
+
+			if dir.Name() == mapName+".pk3" {
+				fmt.Println("Omitting itself (wut)")
+				return nil
+			}
+
+			header, err := zip.FileInfoHeader(fileInfo)
+			if err != nil {
+				return err
+			}
+
+			name := strings.Replace(path, sourcePath, "", 1)
+			header.Method = zip.Deflate
+			header.Name = name
+			if dir.IsDir() {
+				header.Name += "/"
+			}
+
+			headerWriter, err := writer.CreateHeader(header)
+			if err != nil {
+				return err
+			}
+
+			if dir.IsDir() {
+				return nil
+			}
+
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			_, err = io.Copy(headerWriter, file)
 			return err
-		}
-
-		fileInfo, err := dir.Info()
-		if err != nil {
-			return err
-		}
-
-		if dir.Name() == mapName {
-			fmt.Println("Omitting map name folder")
-			return nil
-		}
-
-		if dir.Name() == mapName+".pk3" {
-			fmt.Println("Omitting itself (wut)")
-			return nil
-		}
-
-		header, err := zip.FileInfoHeader(fileInfo)
-		if err != nil {
-			return err
-		}
-
-		name := strings.Replace(path, sourcePath, "", 1)
-		header.Method = zip.Deflate
-		header.Name = name
-		if dir.IsDir() {
-			header.Name += "/"
-		}
-
-		headerWriter, err := writer.CreateHeader(header)
-		if err != nil {
-			return err
-		}
-
-		if dir.IsDir() {
-			return nil
-		}
-
-		file, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-
-		_, err = io.Copy(headerWriter, file)
-		return err
-	})
+		},
+	)
+	fmt.Printf("Created pk3 %s\n", pk3Path)
+	fmt.Printf("Deleting output folder")
+	DeleteFolderAndSubFolders(outputFolder)
+	return pk3Path, err
 }
 
 func AddResourceIfExists(baseq3Folder string, resourcePath string, outputFolder string) string {

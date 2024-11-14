@@ -2,6 +2,7 @@ package test
 
 import (
 	"archive/zip"
+	"fmt"
 	"os"
 	"slices"
 	"testing"
@@ -38,14 +39,14 @@ func TestMakePk3(t *testing.T) {
 		"textures/testmap/test_texture_3.tga",
 	}
 
-	builder.MakePk3("testmap", "data/baseq3")
+	pk3Path := builder.MakePk3("testmap", "data/baseq3")
 
-	_, err := os.Stat("output/testmap.pk3")
+	_, err := os.Stat(pk3Path)
 	if err != nil {
 		t.Fatalf("PK3 does not exist: %s", err)
 	}
 
-	readCloser, err := zip.OpenReader("output/testmap.pk3")
+	readCloser, err := zip.OpenReader(pk3Path)
 	if err != nil {
 		t.Fatalf("Open reader blew up: %s", err)
 	}
@@ -67,7 +68,7 @@ func TestMakePk3(t *testing.T) {
 
 func TestCreatePk3(t *testing.T) {
 	resources := []string{"scripts/testmap.arena", "levelshots/testmap.jpg", "maps/testmap.map"}
-	builder.CreatePk3("data/baseq3", resources, "testmap", true)
+	pk3Path := builder.CreatePk3("data/baseq3", resources, "testmap", true)
 
 	expected := []string{
 		"/",
@@ -79,12 +80,12 @@ func TestCreatePk3(t *testing.T) {
 		"scripts/testmap.arena",
 	}
 
-	_, err := os.Stat("output/testmap.pk3")
+	_, err := os.Stat(pk3Path)
 	if err != nil {
 		t.Errorf("PK3 does not exist: %s", err)
 	}
 
-	readCloser, err := zip.OpenReader("output/testmap.pk3")
+	readCloser, err := zip.OpenReader(pk3Path)
 	if err != nil {
 		t.Errorf("Open reader blew up: %s", err)
 	}
@@ -103,7 +104,7 @@ func TestCreatePk3(t *testing.T) {
 		t.Errorf("Expected number of paths to be %v but got %v", expectedNumOfPaths, numOfPaths)
 	}
 
-	// builder.DeleteFolderAndSubFolders("output")
+	builder.DeleteFolderAndSubFolders("output")
 }
 
 func TestCreateDirectory(t *testing.T) {
@@ -115,7 +116,7 @@ func TestCreateDirectory(t *testing.T) {
 	builder.DeleteFolderAndSubFolders("testcreate")
 }
 
-func TestZipOutputFolder(t *testing.T) {
+func TestZipOutputFolderAsPk3(t *testing.T) {
 	builder.CreateDirectory("output", "")
 	builder.CreateDirectory("env", "output")
 	builder.CreateDirectory("maps", "output")
@@ -125,18 +126,20 @@ func TestZipOutputFolder(t *testing.T) {
 	builder.CreateDirectory("sounds", "output")
 	builder.CreateDirectory("levelshots", "output")
 
-	err := builder.ZipOutputFolderAsPk3("output", "testmap")
+	pk3Path, err := builder.ZipOutputFolderAsPk3("output", "testmap")
 	if err != nil {
 		t.Errorf("Error while creating pk3: %s", err)
 	}
 
-	_, statErr := os.Stat("output/testmap.pk3")
-
-	if statErr != nil {
-		t.Errorf("ZIP does not exist: %s", statErr)
+	_, err = os.Stat(pk3Path)
+	if err != nil {
+		t.Errorf("ZIP does not exist: %s", err)
 	}
 
-	builder.DeleteFolderAndSubFolders("output")
+	_, err = os.Stat("output")
+	if err == nil {
+		t.Errorf("Output folder still exists %s", err)
+	}
 }
 
 func TestAddResourceIfExists(t *testing.T) {
