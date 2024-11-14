@@ -1,15 +1,73 @@
-package builder
+package test
 
 import (
 	"archive/zip"
 	"os"
 	"slices"
 	"testing"
+
+	"gomaker/internal/builder"
 )
+
+func TestMakePk3(t *testing.T) {
+	expected := []string{
+		"/",
+		"testmap.txt",
+		"cfg-maps/",
+		"cfg-maps/testmap.cfg",
+		"levelshots/",
+		"levelshots/testmap.jpg",
+		"maps/",
+		"maps/testmap.bsp",
+		"maps/testmap.map",
+		"maps/testmap/lm_0000.tga",
+		"maps/testmap/lm_0001.tga",
+		"maps/testmap/lm_0002.tga",
+		"scripts/",
+		"scripts/testmap.arena",
+		"scripts/testmap.shader",
+		"scripts/test_shader_2.shader",
+		"sound/",
+		"sound/testmap/sound-file.wav",
+		"textures/",
+		"textures/testmap/test_model_texture_1.jpg",
+		"textures/testmap/test_model_texture_2.tga",
+		"textures/testmap/test_shader_2.tga",
+		"textures/testmap/test_shader_3.jpg",
+		"textures/testmap/test_texture.jpg",
+		"textures/testmap/test_texture_3.tga",
+	}
+
+	builder.MakePk3("testmap", "data/baseq3")
+
+	_, err := os.Stat("output/testmap.pk3")
+	if err != nil {
+		t.Fatalf("PK3 does not exist: %s", err)
+	}
+
+	readCloser, err := zip.OpenReader("output/testmap.pk3")
+	if err != nil {
+		t.Fatalf("Open reader blew up: %s", err)
+	}
+	defer readCloser.Close()
+
+	numOfPaths := len(readCloser.File)
+	for _, f := range readCloser.File {
+		path := f.Name
+		if !slices.Contains(expected, path) {
+			t.Fatalf("Expected %s to be in %v", path, expected)
+		}
+	}
+
+	expectedNumOfPaths := len(expected)
+	if numOfPaths != len(expected) {
+		t.Fatalf("Expected number of paths to be %v but got %v", expectedNumOfPaths, numOfPaths)
+	}
+}
 
 func TestCreatePk3(t *testing.T) {
 	resources := []string{"scripts/testmap.arena", "levelshots/testmap.jpg", "maps/testmap.map"}
-	CreatePk3("resources", resources, "testmap", true)
+	builder.CreatePk3("data/baseq3", resources, "testmap", true)
 
 	expected := []string{
 		"/",
@@ -45,29 +103,29 @@ func TestCreatePk3(t *testing.T) {
 		t.Errorf("Expected number of paths to be %v but got %v", expectedNumOfPaths, numOfPaths)
 	}
 
-	DeleteFolderAndSubFolders("output")
+	// builder.DeleteFolderAndSubFolders("output")
 }
 
 func TestCreateDirectory(t *testing.T) {
 	expected := true
-	actual := createDirectory("testcreate", "")
+	actual := builder.CreateDirectory("testcreate", "")
 	if actual != expected {
 		t.Errorf("Expected %v got %v", expected, actual)
 	}
-	DeleteFolderAndSubFolders("testcreate")
+	builder.DeleteFolderAndSubFolders("testcreate")
 }
 
 func TestZipOutputFolder(t *testing.T) {
-	createDirectory("output", "")
-	createDirectory("env", "output")
-	createDirectory("maps", "output")
-	createDirectory("textures", "output")
-	createDirectory("randomdir", "output/textures")
-	createDirectory("scripts", "output")
-	createDirectory("sounds", "output")
-	createDirectory("levelshots", "output")
+	builder.CreateDirectory("output", "")
+	builder.CreateDirectory("env", "output")
+	builder.CreateDirectory("maps", "output")
+	builder.CreateDirectory("textures", "output")
+	builder.CreateDirectory("randomdir", "output/textures")
+	builder.CreateDirectory("scripts", "output")
+	builder.CreateDirectory("sounds", "output")
+	builder.CreateDirectory("levelshots", "output")
 
-	err := ZipOutputFolderAsPk3("output", "testmap")
+	err := builder.ZipOutputFolderAsPk3("output", "testmap")
 	if err != nil {
 		t.Errorf("Error while creating pk3: %s", err)
 	}
@@ -78,7 +136,7 @@ func TestZipOutputFolder(t *testing.T) {
 		t.Errorf("ZIP does not exist: %s", statErr)
 	}
 
-	DeleteFolderAndSubFolders("output")
+	builder.DeleteFolderAndSubFolders("output")
 }
 
 func TestAddResourceIfExists(t *testing.T) {
@@ -94,17 +152,17 @@ func TestAddResourceIfExists(t *testing.T) {
 
 	for _, test := range tests {
 
-		actual := AddResourceIfExists("resources", test.input, "output")
+		actual := builder.AddResourceIfExists("data/baseq3", test.input, "output")
 		if actual != test.expected {
 			t.Errorf("Expected %v got %v", test.expected, actual)
 		}
 	}
-	DeleteFolderAndSubFolders("output")
+	builder.DeleteFolderAndSubFolders("output")
 }
 
 func TestDeleteFolderAndSubFolders(t *testing.T) {
-	createDirectory("testdelete", "output/")
-	DeleteFolderAndSubFolders("output/testdelete")
+	builder.CreateDirectory("testdelete", "output/")
+	builder.DeleteFolderAndSubFolders("output/testdelete")
 }
 
 func TestGetCfgFile(t *testing.T) {
@@ -117,7 +175,7 @@ func TestGetCfgFile(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := GetCfgFile("resources", test.input)
+		actual := builder.GetCfgFile("data/baseq3", test.input)
 		if actual != test.expected {
 			t.Errorf("Expected %s got %v", test.expected, actual)
 		}
@@ -134,7 +192,7 @@ func TestGetReadme(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := GetReadme("resources", test.input)
+		actual := builder.GetReadme("data/baseq3", test.input)
 		if actual != test.expected {
 			t.Errorf("Expected %s got %v", test.expected, actual)
 		}
@@ -151,7 +209,7 @@ func TestGetBspFile(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := GetBspFile("resources", test.input)
+		actual := builder.GetBspFile("data/baseq3", test.input)
 		if actual != test.expected {
 			t.Errorf("Expected %s got %v", test.expected, actual)
 		}
@@ -168,7 +226,7 @@ func TestGetMapFile(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := GetMapFile("resources", test.input)
+		actual := builder.GetMapFile("data/baseq3", test.input)
 		if actual != test.expected {
 			t.Errorf("Expected %s got %v", test.expected, actual)
 		}
@@ -192,7 +250,7 @@ func TestGetExternalLightmaps(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actualLightmaps := GetExternalLightmaps("resources", test.input)
+		actualLightmaps := builder.GetExternalLightmaps("data/baseq3", test.input)
 		actualLength := len(actualLightmaps)
 		expectedLength := len(test.expected)
 		if actualLength != expectedLength {
@@ -212,7 +270,7 @@ func TestGetExternalLightmaps(t *testing.T) {
 
 func TestGetArenaFile(t *testing.T) {
 	expected := "scripts/testmap.arena"
-	actual := GetArenaFile("resources", "testmap")
+	actual := builder.GetArenaFile("data/baseq3", "testmap")
 	if actual != expected {
 		t.Errorf("Expected %s got %v", expected, actual)
 	}
@@ -229,7 +287,7 @@ func TestGetLevelshot(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := GetLevelshot("resources", test.input)
+		actual := builder.GetLevelshot("data/baseq3", test.input)
 		if actual != test.expected {
 			t.Errorf("Expected %s got %v", test.expected, actual)
 		}
@@ -244,11 +302,11 @@ func TestExtractFolderPaths(t *testing.T) {
 		{"test", "test"},
 		{"this/is/a/test", "this/is/a/test"},
 		{"this/is/also/a/test.txt", "this/is/also/a"},
-		{"resources/scripts/testmap.arena", "resources/scripts"},
+		{"data/baseq3/scripts/testmap.arena", "data/baseq3/scripts"},
 	}
 
 	for _, test := range tests {
-		actual := ExtractFolderPaths(test.input)
+		actual := builder.ExtractFolderPaths(test.input)
 		if actual != test.expected {
 			t.Errorf("Expected %s got %v", test.expected, actual)
 		}

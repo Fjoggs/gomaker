@@ -1,8 +1,10 @@
-package builder
+package test
 
 import (
 	"reflect"
 	"testing"
+
+	"gomaker/internal/material"
 )
 
 func TestGetMaterial(t *testing.T) {
@@ -38,7 +40,7 @@ func TestGetMaterial(t *testing.T) {
 		{"}", ""},
 	}
 	for _, test := range tests {
-		value := getMaterial(test.input)
+		value := material.GetMaterial(test.input)
 		if value != test.expected {
 			t.Errorf("Expected %s got %s for %v", value, test.input, test)
 		}
@@ -60,7 +62,7 @@ func TestIsCustomMaterial(t *testing.T) {
 		{"testmap2/", true},
 	}
 	for _, test := range tests {
-		value := isCustomMaterial(test.input)
+		value := material.IsCustomMaterial(test.input)
 		if value != test.expected {
 			t.Errorf("Expected %v got %s", value, test.input)
 		}
@@ -78,7 +80,7 @@ func TestFormatPath(t *testing.T) {
 		{"textures/ab_c-12/testy", "ab_c-12/testy"},
 	}
 	for _, test := range tests {
-		value := formatPath(test.input)
+		value := material.FormatPath(test.input)
 		if value != test.expected {
 			t.Errorf("Expected %v got %s", value, test.input)
 		}
@@ -95,9 +97,9 @@ func TestIsTexture(t *testing.T) {
 		{"testmap/test_texture_2", false, "testmap/test_texture_2"},
 		{"testmap/test_texture_3", true, "textures/testmap/test_texture_3.tga"},
 	}
-	baseFolderPath := "resources/"
+	baseFolderPath := "data/baseq3/"
 	for _, test := range tests {
-		actualBool, actualTexture := isTexture(test.input, baseFolderPath)
+		actualBool, actualTexture := material.IsTexture(test.input, baseFolderPath)
 		if actualBool != test.expectedBool {
 			t.Errorf("Expected %v got %v for %v", test.expectedBool, actualBool, test.input)
 		}
@@ -121,7 +123,7 @@ func TestAddTrailingSlash(t *testing.T) {
 		{"long/path/yes/slash/", "long/path/yes/slash/"},
 	}
 	for _, test := range tests {
-		actual := addTrailingSlash(test.input)
+		actual := material.AddTrailingSlash(test.input)
 		if actual != test.expected {
 			t.Errorf("Expected %v got %s for %v", test.expected, actual, test.input)
 		}
@@ -131,7 +133,7 @@ func TestAddTrailingSlash(t *testing.T) {
 func TestSortMaterials(t *testing.T) {
 	tests := []struct {
 		input    map[string]int
-		expected Materials
+		expected material.Materials
 	}{
 		{
 			map[string]int{
@@ -139,12 +141,12 @@ func TestSortMaterials(t *testing.T) {
 				"testmap/test_shader":    1,
 				"testmap/test_texture":   1,
 			},
-			Materials{
-				map[string]int{
+			material.Materials{
+				Textures: map[string]int{
 					"textures/testmap/test_texture_3.tga": 1,
 					"textures/testmap/test_texture.jpg":   1,
 				},
-				map[string]int{
+				Shaders: map[string]int{
 					"testmap/test_texture_3": 1,
 					"testmap/test_shader":    1,
 					"testmap/test_texture":   1,
@@ -154,19 +156,19 @@ func TestSortMaterials(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := sortMaterials(test.input, "resources/")
-		equalTextures := reflect.DeepEqual(actual.textures, test.expected.textures)
+		actual := material.SortMaterials(test.input, "data/baseq3/")
+		equalTextures := reflect.DeepEqual(actual.Textures, test.expected.Textures)
 		if !equalTextures {
 			t.Errorf(
 				"Expected %v got %v for %v",
-				test.expected.textures,
-				actual.textures,
+				test.expected.Textures,
+				actual.Textures,
 				test.input,
 			)
 		}
-		equalShaders := reflect.DeepEqual(actual.shaders, test.expected.shaders)
+		equalShaders := reflect.DeepEqual(actual.Shaders, test.expected.Shaders)
 		if !equalShaders {
-			t.Errorf("Expected %v got %v for %v", test.expected.shaders, actual.shaders, test.input)
+			t.Errorf("Expected %v got %v for %v", test.expected.Shaders, actual.Shaders, test.input)
 		}
 	}
 }
@@ -190,7 +192,7 @@ func TestAddTexturePathWithExtension(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		actual := addTexturePathWithExtension(test.input, "resources/")
+		actual := material.AddTexturePathWithExtension(test.input, "data/baseq3/")
 		if !reflect.DeepEqual(actual, test.expected) {
 			t.Errorf("Expected %v got %v for %v", test.expected, actual, test.input)
 		}

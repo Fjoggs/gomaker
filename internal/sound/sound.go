@@ -1,4 +1,4 @@
-package builder
+package sound
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func getSound(line string) string {
+func GetSound(line string) string {
 	soundFile := ""
 	soundRegex := regexp.MustCompile(`((\w+[\/_-]*)+\/((\w)+[\/_-]*)*)+`)
 	sound := soundRegex.FindString(line)
@@ -14,4 +14,11 @@ func getSound(line string) string {
 		soundFile = fmt.Sprintf("%s.wav", sound)
 	}
 	return soundFile
+}
+
+func AddSounds(line string, sounds map[string]int) {
+	sound := GetSound(line)
+	if len(sound) > 0 {
+		sounds[sound] = sounds[sound] + 1
+	}
 }

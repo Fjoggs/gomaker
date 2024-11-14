@@ -1,8 +1,10 @@
-package builder
+package test
 
 import (
 	"reflect"
 	"testing"
+
+	"gomaker/internal/entity"
 )
 
 func TestIsEntity(t *testing.T) {
@@ -24,7 +26,7 @@ func TestIsEntity(t *testing.T) {
 		{"// brush 0", false},
 	}
 	for _, test := range tests {
-		value := isEntity(test.input)
+		value := entity.IsEntity(test.input)
 		if value != test.expected {
 			t.Errorf("Expected %v got %v for %v", test.expected, value, test)
 		}
@@ -40,7 +42,7 @@ func TestParseEntity(t *testing.T) {
 			"{",
 			`"classname" "misc_model"`,
 			`"origin" "-924 -4 536"`,
-			`"model" "resources/models/test-model.ase"`,
+			`"model" "data/baseq3/models/test-model.ase"`,
 			`"angles" "-0 0 -180"`,
 			"}",
 		}, map[string]int{"testmap/test_model_texture_1": 1}},
@@ -48,26 +50,26 @@ func TestParseEntity(t *testing.T) {
 			"{",
 			`"classname" "misc_model"`,
 			`"origin" "-924 -4 536"`,
-			`"model" "resources/models/test-model-2.ase"`,
+			`"model" "data/baseq3/models/test-model-2.ase"`,
 			`"angles" "-0 0 -180"`,
 			"}",
 		}, map[string]int{"texture_test/concrete_tile": 1, "texture_test/texture-2": 1}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
-			`"model" "resources/models/test-material.obj"`,
+			`"model" "data/baseq3/models/test-material.obj"`,
 			"}",
 		}, map[string]int{"testmap/test_model_texture_2": 1}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
-			`"model" "resources/models/test-material-2.obj"`,
+			`"model" "data/baseq3/models/test-material-2.obj"`,
 			"}",
 		}, map[string]int{"texture_test/concrete_tile": 1}},
 		{[]string{
 			"{",
 			`"classname" "misc_model"`,
-			`"model" "resources/models/test-material-2.obj"`,
+			`"model" "data/baseq3/models/test-material-2.obj"`,
 			`"_remap" ":*;textures/test_texture/texture-2"`,
 			"}",
 		}, map[string]int{"test_texture/texture-2": 1}},
@@ -90,7 +92,7 @@ func TestParseEntity(t *testing.T) {
 		{[]string{"{", "}"}, map[string]int{}},
 	}
 	for _, test := range tests {
-		actual := parseEntity(test.input)
+		actual := entity.ParseEntity(test.input)
 		if !reflect.DeepEqual(actual, test.expected) {
 			t.Errorf("Expected %v got %v for %v", test.expected, actual, test.input)
 		}
@@ -102,13 +104,13 @@ func TestModelPath(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{`"model" "resources/models/test-model.ase"`, "resources/models/test-model.ase"},
-		{`"model" "resources/models/test-model-2.ase"`, "resources/models/test-model-2.ase"},
-		{`"model" "resources/models/test-model-3.obj"`, "resources/models/test-model-3.obj"},
+		{`"model" "data/baseq3/models/test-model.ase"`, "data/baseq3/models/test-model.ase"},
+		{`"model" "data/baseq3/models/test-model-2.ase"`, "data/baseq3/models/test-model-2.ase"},
+		{`"model" "data/baseq3/models/test-model-3.obj"`, "data/baseq3/models/test-model-3.obj"},
 		{`"model" "maps/models/test-model.ase"`, "maps/models/test-model.ase"},
 	}
 	for _, test := range tests {
-		actual := modelPath(test.input)
+		actual := entity.ModelPath(test.input)
 		if actual != test.expected {
 			t.Errorf("Expected %s got %s for %v", test.expected, actual, test)
 		}
@@ -128,7 +130,7 @@ func TestRemapTexture(t *testing.T) {
 		{"}", ""},
 	}
 	for _, test := range tests {
-		actual := remapTexture(test.input)
+		actual := entity.RemapTexture(test.input)
 		if actual != test.expected {
 			t.Errorf("Expected %s got %s for %v", test.expected, actual, test)
 		}
@@ -140,16 +142,16 @@ func TestParseModel(t *testing.T) {
 		path     string
 		expected map[string]int
 	}{
-		{"resources/models/test-model.ase", map[string]int{"testmap/test_model_texture_1": 1}},
+		{"data/baseq3/models/test-model.ase", map[string]int{"testmap/test_model_texture_1": 1}},
 		{
-			"resources/models/test-model-2.ase",
+			"data/baseq3/models/test-model-2.ase",
 			map[string]int{"texture_test/concrete_tile": 1, "texture_test/texture-2": 1},
 		},
-		{"resources/models/test-material.mtl", map[string]int{"testmap/test_model_texture_2": 1}},
-		{"resources/models/test-material-2.mtl", map[string]int{"texture_test/concrete_tile": 1}},
+		{"data/baseq3/models/test-material.mtl", map[string]int{"testmap/test_model_texture_2": 1}},
+		{"data/baseq3/models/test-material-2.mtl", map[string]int{"texture_test/concrete_tile": 1}},
 	}
 	for _, test := range tests {
-		actual := parseModel(test.path)
+		actual := entity.ParseModel(test.path)
 		if !reflect.DeepEqual(actual, test.expected) {
 			t.Errorf("Expected %v got %v", test.expected, actual)
 		}
@@ -171,7 +173,7 @@ func TestObjTexture(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		actual := objTexture(test.path)
+		actual := entity.ObjTexture(test.path)
 		if actual != test.expected {
 			t.Errorf("Expected %s got %s for %v", test.expected, actual, test)
 		}
@@ -187,7 +189,7 @@ func TestAseTexture(t *testing.T) {
 		{`*BITMAP	"..\textures\texture_test\concrete_tile.tga"`, "texture_test/concrete_tile"},
 	}
 	for _, test := range tests {
-		actual := aseTexture(test.path)
+		actual := entity.AseTexture(test.path)
 		if actual != test.expected {
 			t.Errorf("Expected %s got %s for %v", test.expected, actual, test)
 		}

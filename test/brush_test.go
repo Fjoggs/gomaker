@@ -1,4 +1,4 @@
-package brush
+package test
 
 import (
 	"testing"

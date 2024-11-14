@@ -1,4 +1,4 @@
-package builder
+package material
 
 import (
 	"fmt"
@@ -7,18 +7,23 @@ import (
 	"strings"
 )
 
-func getMaterial(line string) string {
+type Materials struct {
+	Textures map[string]int
+	Shaders  map[string]int
+}
+
+func GetMaterial(line string) string {
 	textureRegex := regexp.MustCompile(`((\w+[\/_-]*)+\/((\w)+[\/_-]*)*)+`)
 	texture := textureRegex.FindString(line)
 	if len(texture) > 0 {
-		if isCustomMaterial(texture) {
-			return formatPath(texture)
+		if IsCustomMaterial(texture) {
+			return FormatPath(texture)
 		}
 	}
 	return ""
 }
 
-func isCustomMaterial(texture string) bool {
+func IsCustomMaterial(texture string) bool {
 	common := [5]string{"common/", "common_alphascale/", "sfx/", "liquids/", "effects/"}
 	for _, value := range common {
 		if strings.Contains(texture, value) {
@@ -28,12 +33,12 @@ func isCustomMaterial(texture string) bool {
 	return true
 }
 
-func formatPath(texture string) string {
+func FormatPath(texture string) string {
 	return strings.Replace(texture, "textures/", "", 1)
 }
 
-func isTexture(material string, baseFolderPath string) (bool, string) {
-	fsPath := addTrailingSlash(baseFolderPath) + "textures/" + material
+func IsTexture(material string, baseFolderPath string) (bool, string) {
+	fsPath := AddTrailingSlash(baseFolderPath) + "textures/" + material
 	jpg := fmt.Sprintf("%s.jpg", fsPath)
 	tga := fmt.Sprintf("%s.tga", fsPath)
 	jpgFile, jpgErr := os.Open(jpg)
@@ -54,7 +59,7 @@ func isTexture(material string, baseFolderPath string) (bool, string) {
 	return false, material
 }
 
-func addTrailingSlash(path string) string {
+func AddTrailingSlash(path string) string {
 	if path == "" {
 		return path
 	} else {
@@ -68,25 +73,25 @@ func addTrailingSlash(path string) string {
 	}
 }
 
-func sortMaterials(materials map[string]int, basePath string) Materials {
+func SortMaterials(materials map[string]int, basePath string) Materials {
 	sorted := Materials{make(map[string]int), make(map[string]int)}
 	for material := range materials {
-		isT, filePath := isTexture(material, basePath)
+		isT, filePath := IsTexture(material, basePath)
 		if isT {
-			sorted.textures[filePath] = sorted.textures[filePath] + 1
+			sorted.Textures[filePath] = sorted.Textures[filePath] + 1
 			// It can also be a shader
-			sorted.shaders[material] = sorted.shaders[material] + 1
+			sorted.Shaders[material] = sorted.Shaders[material] + 1
 		} else {
-			sorted.shaders[material] = sorted.shaders[material] + 1
+			sorted.Shaders[material] = sorted.Shaders[material] + 1
 		}
 	}
 	return sorted
 }
 
-func addTexturePathWithExtension(textures map[string]int, basePath string) map[string]int {
+func AddTexturePathWithExtension(textures map[string]int, basePath string) map[string]int {
 	returnValue := map[string]int{}
 	for material := range textures {
-		isT, filePath := isTexture(material, basePath)
+		isT, filePath := IsTexture(material, basePath)
 		if isT {
 			returnValue[filePath] = returnValue[filePath] + 1
 		}

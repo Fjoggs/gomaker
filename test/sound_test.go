@@ -1,8 +1,10 @@
-package builder
+package test
 
 import (
 	"reflect"
 	"testing"
+
+	"gomaker/internal/sound"
 )
 
 func TestGetSound(t *testing.T) {
@@ -29,10 +31,24 @@ func TestGetSound(t *testing.T) {
 		{"}", ""},
 	}
 	for _, test := range tests {
-		actual := getSound(test.input)
+		actual := sound.GetSound(test.input)
 
 		if !reflect.DeepEqual(actual, test.expected) {
 			t.Errorf("Expected %v got %v for %s", test.expected, actual, test.input)
 		}
+	}
+}
+
+func TestAddSounds(t *testing.T) {
+	line := `"noise" "sound/testmap/sound-file.wav"`
+	sounds := map[string]int{"sound/testmap/sound-file-2.wav": 1}
+	expected := map[string]int{
+		"sound/testmap/sound-file-2.wav": 1,
+		"sound/testmap/sound-file.wav":   1,
+	}
+
+	sound.AddSounds(line, sounds)
+	if !reflect.DeepEqual(sounds, expected) {
+		t.Errorf("Expected %v got %v", expected, sounds)
 	}
 }

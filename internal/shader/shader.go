@@ -1,4 +1,4 @@
-package builder
+package shader
 
 import (
 	"bufio"
@@ -6,15 +6,17 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"gomaker/internal/material"
 )
 
 type Shader struct {
-	name     string
-	lines    []string
-	textures map[string]int
+	Name     string
+	Lines    []string
+	Textures map[string]int
 }
 
-func extractTexturesFromUsedShaders(
+func ExtractTexturesFromUsedShaders(
 	shadersFromMapFile map[string]int,
 	shaderFolderPath string,
 ) (map[string]int, []string, []string) {
@@ -22,18 +24,18 @@ func extractTexturesFromUsedShaders(
 	textures := map[string]int{}
 	shaderNames := []string{}
 
-	fsPath := addTrailingSlash(shaderFolderPath)
+	fsPath := material.AddTrailingSlash(shaderFolderPath)
 	directory, err := os.ReadDir(fsPath)
 
 	for _, file := range directory {
 		shaderFileName := file.Name()
-		shaders := parseShaderFile(shadersFromMapFile, shaderFileName, shaderFolderPath)
+		shaders := ParseShaderFile(shadersFromMapFile, shaderFileName, shaderFolderPath)
 		for _, shader := range shaders {
-			delete(shadersFromMapFile, shader.name)
+			delete(shadersFromMapFile, shader.Name)
 		}
 		if len(shaders) > 0 {
 			shaderFiles = append(shaderFiles, shaderFileName)
-			textures, shaderNames = combineTexturesFromShaders(shaders, textures, shaderNames)
+			textures, shaderNames = CombineTexturesFromShaders(shaders, textures, shaderNames)
 		}
 	}
 
@@ -46,26 +48,26 @@ func extractTexturesFromUsedShaders(
 	return textures, shaderNames, shaderFiles
 }
 
-func combineTexturesFromShaders(
+func CombineTexturesFromShaders(
 	shaders []Shader,
 	textures map[string]int,
 	shaderNames []string,
 ) (map[string]int, []string) {
 	for _, shader := range shaders {
-		shaderNames = append(shaderNames, shader.name)
-		for texture, count := range shader.textures {
+		shaderNames = append(shaderNames, shader.Name)
+		for texture, count := range shader.Textures {
 			textures[texture] = count
 		}
 	}
 	return textures, shaderNames
 }
 
-func parseShaderFile(
+func ParseShaderFile(
 	shadersFromMapFile map[string]int,
 	shaderFileName string,
 	shaderFolderPath string,
 ) []Shader {
-	fsPath := addTrailingSlash(shaderFolderPath) + shaderFileName
+	fsPath := material.AddTrailingSlash(shaderFolderPath) + shaderFileName
 	file, err := os.Open(fsPath)
 	if err != nil {
 		fmt.Printf("Failed opening file %v with path %s, error %s", file, shaderFileName, err)
@@ -80,21 +82,20 @@ func parseShaderFile(
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.Contains(line, "qer_editorimage") {
-			// fmt.Printf("Editor image %s, ignoring", line)
 			continue
 		}
-		texture := getMaterial(line)
+		texture := material.GetMaterial(line)
 		if parsingShader {
-			shader.lines = append(shader.lines, line)
+			shader.Lines = append(shader.Lines, line)
 		}
 		if len(texture) > 0 {
-			isShaderName := isShaderName(line)
-			if isShaderName && shaderIsUsed(shadersFromMapFile, texture) {
+			isShaderName := IsShaderName(line)
+			if isShaderName && ShaderIsUsed(shadersFromMapFile, texture) {
 				parsingShader = true
-				shader.name = texture
-				shader.lines = append(shader.lines, line)
+				shader.Name = texture
+				shader.Lines = append(shader.Lines, line)
 			} else if parsingShader {
-				shader.textures[texture] = shader.textures[texture] + 1
+				shader.Textures[texture] = shader.Textures[texture] + 1
 			}
 		}
 		if strings.Contains(line, "{") {
@@ -115,12 +116,12 @@ func parseShaderFile(
 	return shaders
 }
 
-func shaderIsUsed(shadersFromMapFile map[string]int, shaderName string) bool {
+func ShaderIsUsed(shadersFromMapFile map[string]int, shaderName string) bool {
 	_, ok := shadersFromMapFile[shaderName]
 	return ok
 }
 
-func isShaderName(line string) bool {
+func IsShaderName(line string) bool {
 	line = strings.Replace(line, "{", "", 1)
 	line = strings.TrimSpace(line)
 	hasWhitespaceRegexp := regexp.MustCompile(`\s`)

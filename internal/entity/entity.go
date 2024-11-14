@@ -1,4 +1,4 @@
-package builder
+package entity
 
 import (
 	"bufio"
@@ -6,9 +6,11 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"gomaker/internal/material"
 )
 
-func isEntity(line string) bool {
+func IsEntity(line string) bool {
 	match, err := regexp.MatchString("// entity", strings.ToLower(line))
 	if err != nil {
 		fmt.Println("Something went wrong", err)
@@ -17,7 +19,7 @@ func isEntity(line string) bool {
 	return match
 }
 
-func parseEntity(lines []string) map[string]int {
+func ParseEntity(lines []string) map[string]int {
 	textures := map[string]int{}
 	modelPathLine := ""
 	hasRemap := false
@@ -29,7 +31,7 @@ func parseEntity(lines []string) map[string]int {
 		}
 		if strings.Contains(line, "_remap") {
 			hasRemap = true
-			texture := remapTexture(line)
+			texture := RemapTexture(line)
 			textures[texture] = textures[texture] + 1
 			return textures
 		} else if strings.Contains(line, ".ase") {
@@ -39,13 +41,13 @@ func parseEntity(lines []string) map[string]int {
 		}
 	}
 	if !hasRemap && isModel {
-		modelPath := modelPath(modelPathLine)
-		textures = parseModel(modelPath)
+		modelPath := ModelPath(modelPathLine)
+		textures = ParseModel(modelPath)
 	}
 	return textures
 }
 
-func modelPath(line string) string {
+func ModelPath(line string) string {
 	_, after, didCut := strings.Cut(line, "model")
 	if didCut {
 		after = strings.Replace(after, `"`, "", 3)
@@ -54,7 +56,7 @@ func modelPath(line string) string {
 	return ""
 }
 
-func parseModel(modelPath string) map[string]int {
+func ParseModel(modelPath string) map[string]int {
 	textures := map[string]int{}
 	file, err := os.Open(modelPath)
 	if err != nil {
@@ -67,9 +69,9 @@ func parseModel(modelPath string) map[string]int {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.Contains(modelPath, ".mtl") {
-			texture = objTexture(line)
+			texture = ObjTexture(line)
 		} else {
-			texture = aseTexture(line)
+			texture = AseTexture(line)
 		}
 		if len(texture) > 0 {
 			textures[texture] = textures[texture] + 1
@@ -83,36 +85,36 @@ func parseModel(modelPath string) map[string]int {
 	return textures
 }
 
-func objTexture(line string) string {
+func ObjTexture(line string) string {
 	materialRegex := regexp.MustCompile("map_Kd")
-	material := materialRegex.FindString(line)
-	if len(material) > 0 {
+	mat := materialRegex.FindString(line)
+	if len(mat) > 0 {
 		line = strings.TrimSpace(line)
 		_, after, didCut := strings.Cut(line, `textures`)
 		if didCut {
 			texture := strings.ReplaceAll(after, "\\", "/")
 			texture = strings.Replace(texture, `"`, "", 1)
-			return getMaterial(texture)
+			return material.GetMaterial(texture)
 		}
 	}
 	return ""
 }
 
-func aseTexture(line string) string {
+func AseTexture(line string) string {
 	materialRegex := regexp.MustCompile(`\*BITMAP[^_]`)
-	material := materialRegex.FindString(line)
-	if len(material) > 0 {
+	mat := materialRegex.FindString(line)
+	if len(mat) > 0 {
 		line = strings.TrimSpace(line)
 		_, after, didCut := strings.Cut(line, `textures`)
 		if didCut {
 			texture := strings.ReplaceAll(after, "\\", "/")
 			texture = strings.Replace(texture, `"`, "", 1)
-			return getMaterial(texture)
+			return material.GetMaterial(texture)
 		}
 	}
 	return ""
 }
 
-func remapTexture(line string) string {
-	return getMaterial(line)
+func RemapTexture(line string) string {
+	return material.GetMaterial(line)
 }
