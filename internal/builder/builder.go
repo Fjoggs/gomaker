@@ -17,23 +17,35 @@ import (
 func MakePk3(mapName string, basePath string) string {
 	resources := []string{}
 
-	readme := GetReadme(basePath, mapName)
-	resources = append(resources, readme)
+	resource := GetReadme(basePath, mapName)
+	if len(resource) > 0 {
+		resources = append(resources, resource)
+	}
 
-	cfg := GetCfgFile(basePath, mapName)
-	resources = append(resources, cfg)
+	resource = GetCfgFile(basePath, mapName)
+	if len(resource) > 0 {
+		resources = append(resources, resource)
+	}
 
-	mapFile := GetMapFile(basePath, mapName)
-	resources = append(resources, mapFile)
+	resource = GetMapFile(basePath, mapName)
+	if len(resource) > 0 {
+		resources = append(resources, resource)
+	}
 
-	bspFile := GetBspFile(basePath, mapName)
-	resources = append(resources, bspFile)
+	resource = GetBspFile(basePath, mapName)
+	if len(resource) > 0 {
+		resources = append(resources, resource)
+	}
 
-	arenaFile := GetArenaFile(basePath, mapName)
-	resources = append(resources, arenaFile)
+	resource = GetArenaFile(basePath, mapName)
+	if len(resource) > 0 {
+		resources = append(resources, resource)
+	}
 
-	levelshot := GetLevelshot(basePath, mapName)
-	resources = append(resources, levelshot)
+	resource = GetLevelshot(basePath, mapName)
+	if len(resource) > 0 {
+		resources = append(resources, resource)
+	}
 
 	lightmaps := GetExternalLightmaps(basePath, mapName)
 
@@ -71,7 +83,6 @@ func CreatePk3(baseq3Folder string, resources []string, mapName string, overwrit
 
 	CreateDirectory("output", "")
 	for _, resource := range resources {
-		fmt.Printf("Checking if resource %s exists\n", resource)
 		AddResourceIfExists(baseq3Folder, resource, "output")
 	}
 
@@ -133,12 +144,10 @@ func ZipOutputFolderAsPk3(outputFolder string, mapName string) (string, error) {
 			}
 
 			if dir.Name() == mapName {
-				fmt.Println("Omitting map name folder")
 				return nil
 			}
 
 			if dir.Name() == mapName+".pk3" {
-				fmt.Println("Omitting itself (wut)")
 				return nil
 			}
 
@@ -181,7 +190,6 @@ func ZipOutputFolderAsPk3(outputFolder string, mapName string) (string, error) {
 
 func AddResourceIfExists(baseq3Folder string, resourcePath string, outputFolder string) string {
 	path := fmt.Sprintf("%s%s", material.AddTrailingSlash(baseq3Folder), resourcePath)
-	fmt.Printf("path %s\n", path)
 
 	_, exists := os.Stat(path)
 	if exists != nil {
@@ -199,7 +207,6 @@ func AddResourceIfExists(baseq3Folder string, resourcePath string, outputFolder 
 	destFolder := ExtractFolderPaths(destPath)
 	_, exists = os.Stat(destFolder)
 	if exists != nil {
-		fmt.Printf("Destination path does not exist: %s\n", destPath)
 		err = os.MkdirAll(destFolder, 0777)
 		if err != nil {
 			fmt.Printf("MkdirAll returned error: %s", err)
@@ -210,6 +217,7 @@ func AddResourceIfExists(baseq3Folder string, resourcePath string, outputFolder 
 	destFile, err := os.Create(destPath)
 	if err != nil {
 		fmt.Printf("Something went wrong creating target file: %s\n", err)
+		fmt.Printf("Resource path: %s\n", resourcePath)
 		return ""
 	}
 
@@ -243,7 +251,7 @@ func GetCfgFile(baseq3Folder string, mapName string) string {
 	)
 	file, err := os.Open(mapFilePath)
 	if err != nil {
-		fmt.Printf("No .cfg file found: %s", err)
+		fmt.Printf("No .cfg file found: %s\n", err)
 		return ""
 	}
 
@@ -256,7 +264,7 @@ func GetReadme(baseq3Folder string, mapName string) string {
 	mapFilePath := fmt.Sprintf("%s%s.txt", material.AddTrailingSlash(baseq3Folder), mapName)
 	file, err := os.Open(mapFilePath)
 	if err != nil {
-		fmt.Printf("No .txt file found: %s", err)
+		fmt.Printf("No .txt file found: %s\n", err)
 		return ""
 	}
 
@@ -269,7 +277,7 @@ func GetBspFile(baseq3Folder string, mapName string) string {
 	mapFilePath := fmt.Sprintf("%smaps/%s.bsp", material.AddTrailingSlash(baseq3Folder), mapName)
 	file, err := os.Open(mapFilePath)
 	if err != nil {
-		fmt.Printf("No .bsp file found: %s", err)
+		fmt.Printf("No .bsp file found: %s\n", err)
 		return ""
 	}
 
@@ -282,7 +290,7 @@ func GetMapFile(baseq3Folder string, mapName string) string {
 	mapFilePath := fmt.Sprintf("%smaps/%s.map", material.AddTrailingSlash(baseq3Folder), mapName)
 	file, err := os.Open(mapFilePath)
 	if err != nil {
-		fmt.Printf("No .map file found: %s", err)
+		fmt.Printf("No .map file found: %s\n", err)
 		return ""
 	}
 
@@ -296,7 +304,6 @@ func GetExternalLightmaps(baseq3Folder string, mapName string) []string {
 	file, err := os.Open(mapFilePath)
 	lightmaps := []string{}
 	if err != nil {
-		fmt.Printf("No external lightmap folder found: %s\n", err)
 		return lightmaps
 	}
 
@@ -306,7 +313,6 @@ func GetExternalLightmaps(baseq3Folder string, mapName string) []string {
 		}
 
 		if mapName == d.Name() {
-			fmt.Printf("Ignoring root folder %s", d.Name())
 			return err
 		}
 
@@ -319,7 +325,6 @@ func GetExternalLightmaps(baseq3Folder string, mapName string) []string {
 	}
 
 	defer file.Close()
-	fmt.Printf("Found lightmaps %s\n", lightmaps)
 	return lightmaps
 }
 
@@ -331,7 +336,7 @@ func GetArenaFile(baseq3Folder string, mapName string) string {
 	)
 	file, err := os.Open(arenaFilePath)
 	if err != nil {
-		fmt.Printf("No arena file found: %s", err)
+		fmt.Println(err)
 		return ""
 	}
 

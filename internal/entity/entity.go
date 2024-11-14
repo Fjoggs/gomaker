@@ -22,7 +22,6 @@ func IsEntity(line string) bool {
 func ParseEntity(lines []string) map[string]int {
 	textures := map[string]int{}
 	modelPathLine := ""
-	hasRemap := false
 	isModel := false
 	for _, line := range lines {
 		if !isModel {
@@ -30,7 +29,6 @@ func ParseEntity(lines []string) map[string]int {
 			isModel = strings.Contains(line, "misc_model")
 		}
 		if strings.Contains(line, "_remap") {
-			hasRemap = true
 			texture := RemapTexture(line)
 			textures[texture] = textures[texture] + 1
 			return textures
@@ -40,7 +38,7 @@ func ParseEntity(lines []string) map[string]int {
 			modelPathLine = strings.Replace(line, ".obj", ".mtl", 1)
 		}
 	}
-	if !hasRemap && isModel {
+	if isModel {
 		modelPath := ModelPath(modelPathLine)
 		textures = ParseModel(modelPath)
 	}
