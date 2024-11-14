@@ -2,7 +2,6 @@ package test
 
 import (
 	"archive/zip"
-	"fmt"
 	"os"
 	"slices"
 	"testing"
