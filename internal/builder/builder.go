@@ -14,7 +14,7 @@ import (
 	"gomaker/internal/parser"
 )
 
-func MakePk3(mapName string, basePath string) string {
+func BuildPk3(mapName string, basePath string) string {
 	resources := []string{}
 
 	resource := GetReadme(basePath, mapName)
@@ -66,22 +66,12 @@ func MakePk3(mapName string, basePath string) string {
 	resources = append(resources, lightmaps...)
 	resources = append(resources, shaderNames...)
 
-	pk3Path := CreatePk3(basePath, resources, mapName, false)
+	pk3Path := CreatePk3(basePath, resources, mapName)
 	return pk3Path
 }
 
-func CreatePk3(baseq3Folder string, resources []string, mapName string, overwrite bool) string {
-	if overwrite {
-		DeleteFolderAndSubFolders(
-			fmt.Sprintf(
-				"%s%s",
-				material.AddTrailingSlash(baseq3Folder),
-				material.AddTrailingSlash(mapName),
-			),
-		)
-	}
-
-	CreateDirectory("output", "")
+func CreatePk3(baseq3Folder string, resources []string, mapName string) string {
+	CreateDirectory("output")
 	for _, resource := range resources {
 		AddResourceIfExists(baseq3Folder, resource, "output")
 	}
@@ -93,16 +83,15 @@ func CreatePk3(baseq3Folder string, resources []string, mapName string, overwrit
 	return pk3Path
 }
 
-func CreateDirectory(folderName string, mapName string) bool {
-	path := material.AddTrailingSlash(mapName) + folderName
-	_, existErr := os.Stat(path)
+func CreateDirectory(folderName string) bool {
+	_, err := os.Stat(folderName)
 
-	if existErr == nil {
-		fmt.Printf("Removing existing folder %s and contents\n", path)
-		DeleteFolderAndSubFolders(path)
+	if err == nil {
+		fmt.Printf("Removing existing folder %s and contents\n", folderName)
+		DeleteFolderAndSubFolders(folderName)
 	}
 
-	err := os.Mkdir(path, 0777)
+	err = os.Mkdir(folderName, 0777)
 	if err != nil {
 		fmt.Printf("It blew up mate %s\n", err)
 		return false

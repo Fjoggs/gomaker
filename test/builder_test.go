@@ -2,6 +2,7 @@ package test
 
 import (
 	"archive/zip"
+	"fmt"
 	"os"
 	"slices"
 	"testing"
@@ -9,7 +10,7 @@ import (
 	"gomaker/internal/builder"
 )
 
-func TestMakePk3(t *testing.T) {
+func TestBuildPk3(t *testing.T) {
 	expected := []string{
 		"/",
 		"testmap.txt",
@@ -38,7 +39,7 @@ func TestMakePk3(t *testing.T) {
 		"textures/testmap/test_texture_3.tga",
 	}
 
-	pk3Path := builder.MakePk3("testmap", "data/baseq3")
+	pk3Path := builder.BuildPk3("testmap", "data/baseq3")
 
 	_, err := os.Stat(pk3Path)
 	if err != nil {
@@ -67,7 +68,7 @@ func TestMakePk3(t *testing.T) {
 
 func TestCreatePk3(t *testing.T) {
 	resources := []string{"scripts/testmap.arena", "levelshots/testmap.jpg", "maps/testmap.map"}
-	pk3Path := builder.CreatePk3("data/baseq3", resources, "testmap", true)
+	pk3Path := builder.CreatePk3("data/baseq3", resources, "testmap")
 
 	expected := []string{
 		"/",
@@ -108,7 +109,7 @@ func TestCreatePk3(t *testing.T) {
 
 func TestCreateDirectory(t *testing.T) {
 	expected := true
-	actual := builder.CreateDirectory("testcreate", "")
+	actual := builder.CreateDirectory("testcreate")
 	if actual != expected {
 		t.Errorf("Expected %v got %v", expected, actual)
 	}
@@ -116,14 +117,15 @@ func TestCreateDirectory(t *testing.T) {
 }
 
 func TestZipOutputFolderAsPk3(t *testing.T) {
-	builder.CreateDirectory("output", "")
-	builder.CreateDirectory("env", "output")
-	builder.CreateDirectory("maps", "output")
-	builder.CreateDirectory("textures", "output")
-	builder.CreateDirectory("randomdir", "output/textures")
-	builder.CreateDirectory("scripts", "output")
-	builder.CreateDirectory("sounds", "output")
-	builder.CreateDirectory("levelshots", "output")
+	rootFolder := "output"
+	builder.CreateDirectory(rootFolder)
+	createSubFolder(rootFolder, "env")
+	createSubFolder(rootFolder, "maps")
+	createSubFolder(rootFolder, "textures")
+	createSubFolder(rootFolder+"/textures", "randomdir")
+	createSubFolder(rootFolder, "scripts")
+	createSubFolder(rootFolder, "sounds")
+	createSubFolder(rootFolder, "levelshots")
 
 	pk3Path, err := builder.ZipOutputFolderAsPk3("output", "testmap")
 	if err != nil {
@@ -163,7 +165,8 @@ func TestAddResourceIfExists(t *testing.T) {
 }
 
 func TestDeleteFolderAndSubFolders(t *testing.T) {
-	builder.CreateDirectory("testdelete", "output/")
+	builder.CreateDirectory("output")
+	createSubFolder("output", "testdelete")
 	builder.DeleteFolderAndSubFolders("output/testdelete")
 }
 
@@ -312,5 +315,13 @@ func TestExtractFolderPaths(t *testing.T) {
 		if actual != test.expected {
 			t.Errorf("Expected %s got %v", test.expected, actual)
 		}
+	}
+}
+
+func createSubFolder(rootFolder string, folderName string) {
+	path := fmt.Sprintf("%s/%s", rootFolder, folderName)
+	err := os.Mkdir(path, 0777)
+	if err != nil {
+		fmt.Printf("createSubFolder for path %s failed with err: %s", path, err)
 	}
 }
