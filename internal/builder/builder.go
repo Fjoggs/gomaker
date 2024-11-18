@@ -17,34 +17,39 @@ import (
 func BuildPk3(mapName string, basePath string) string {
 	resources := []string{}
 
-	resource := GetReadme(basePath, mapName)
+	resource := GetFile(basePath, fmt.Sprintf("%s.txt", mapName))
 	if len(resource) > 0 {
 		resources = append(resources, resource)
 	}
 
-	resource = GetCfgFile(basePath, mapName)
+	resource = GetFile(basePath, fmt.Sprintf("cfg-maps/%s.cfg", mapName))
 	if len(resource) > 0 {
 		resources = append(resources, resource)
 	}
 
-	resource = GetMapFile(basePath, mapName)
+	resource = GetFile(basePath, fmt.Sprintf("maps/%s.map", mapName))
 	if len(resource) > 0 {
 		resources = append(resources, resource)
 	}
 
-	resource = GetBspFile(basePath, mapName)
+	resource = GetFile(basePath, fmt.Sprintf("maps/%s.bsp", mapName))
 	if len(resource) > 0 {
 		resources = append(resources, resource)
 	}
 
-	resource = GetArenaFile(basePath, mapName)
+	resource = GetFile(basePath, fmt.Sprintf("scripts/%s.arena", mapName))
 	if len(resource) > 0 {
 		resources = append(resources, resource)
 	}
 
-	resource = GetLevelshot(basePath, mapName)
+	resource = GetFile(basePath, fmt.Sprintf("levelshots/%s.jpg", mapName))
 	if len(resource) > 0 {
 		resources = append(resources, resource)
+	} else {
+		resource = GetFile(basePath, fmt.Sprintf("levelshots/%s.tga", mapName))
+		if len(resource) > 0 {
+			resources = append(resources, resource)
+		}
 	}
 
 	lightmaps := GetExternalLightmaps(basePath, mapName)
@@ -232,60 +237,19 @@ func DeleteFolderAndSubFolders(folder string) {
 	os.RemoveAll(path)
 }
 
-func GetCfgFile(baseq3Folder string, mapName string) string {
-	mapFilePath := fmt.Sprintf(
-		"%scfg-maps/%s.cfg",
+func GetFile(baseq3Folder string, filePathTemplate string) string {
+	filePath := fmt.Sprintf(
+		"%s%s",
 		material.AddTrailingSlash(baseq3Folder),
-		mapName,
+		filePathTemplate,
 	)
-	file, err := os.Open(mapFilePath)
+	_, err := os.Stat(filePath)
 	if err != nil {
-		fmt.Printf("No .cfg file found: %s\n", err)
+		fmt.Println(err)
 		return ""
 	}
 
-	defer file.Close()
-	fmt.Printf("Found .cfg file %s.cfg\n", mapName)
-	return fmt.Sprintf("cfg-maps/%s.cfg", mapName)
-}
-
-func GetReadme(baseq3Folder string, mapName string) string {
-	mapFilePath := fmt.Sprintf("%s%s.txt", material.AddTrailingSlash(baseq3Folder), mapName)
-	file, err := os.Open(mapFilePath)
-	if err != nil {
-		fmt.Printf("No .txt file found: %s\n", err)
-		return ""
-	}
-
-	defer file.Close()
-	fmt.Printf("Found .txt file %s.txt\n", mapName)
-	return fmt.Sprintf("%s.txt", mapName)
-}
-
-func GetBspFile(baseq3Folder string, mapName string) string {
-	mapFilePath := fmt.Sprintf("%smaps/%s.bsp", material.AddTrailingSlash(baseq3Folder), mapName)
-	file, err := os.Open(mapFilePath)
-	if err != nil {
-		fmt.Printf("No .bsp file found: %s\n", err)
-		return ""
-	}
-
-	defer file.Close()
-	fmt.Printf("Found .bsp file %s.bsp\n", mapName)
-	return fmt.Sprintf("maps/%s.bsp", mapName)
-}
-
-func GetMapFile(baseq3Folder string, mapName string) string {
-	mapFilePath := fmt.Sprintf("%smaps/%s.map", material.AddTrailingSlash(baseq3Folder), mapName)
-	file, err := os.Open(mapFilePath)
-	if err != nil {
-		fmt.Printf("No .map file found: %s\n", err)
-		return ""
-	}
-
-	defer file.Close()
-	fmt.Printf("Found .map file %s.map\n", mapName)
-	return fmt.Sprintf("maps/%s.map", mapName)
+	return filePathTemplate
 }
 
 func GetExternalLightmaps(baseq3Folder string, mapName string) []string {

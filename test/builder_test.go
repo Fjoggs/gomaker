@@ -170,68 +170,23 @@ func TestDeleteFolderAndSubFolders(t *testing.T) {
 	builder.DeleteFolderAndSubFolders("output/testdelete")
 }
 
-func TestGetCfgFile(t *testing.T) {
+func TestGetFile(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected string
 	}{
-		{"test", ""},
-		{"testmap", "cfg-maps/testmap.cfg"},
+		{"", ""},
+		{"testmap.txt", "testmap.txt"},
+		{"cfg-maps/testmap.cfg", "cfg-maps/testmap.cfg"},
+		{"maps/testmap.bsp", "maps/testmap.bsp"},
+		{"maps/testmap.map", "maps/testmap.map"},
+		{"scripts/testmap.arena", "scripts/testmap.arena"},
+		{"levelshots/testmap.jpg", "levelshots/testmap.jpg"},
+		{"levelshots/testmap2.tga", "levelshots/testmap2.tga"},
 	}
 
 	for _, test := range tests {
-		actual := builder.GetCfgFile("data/baseq3", test.input)
-		if actual != test.expected {
-			t.Errorf("Expected %s got %v", test.expected, actual)
-		}
-	}
-}
-
-func TestGetReadme(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{"test", ""},
-		{"testmap", "testmap.txt"},
-	}
-
-	for _, test := range tests {
-		actual := builder.GetReadme("data/baseq3", test.input)
-		if actual != test.expected {
-			t.Errorf("Expected %s got %v", test.expected, actual)
-		}
-	}
-}
-
-func TestGetBspFile(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{"test", ""},
-		{"testmap", "maps/testmap.bsp"},
-	}
-
-	for _, test := range tests {
-		actual := builder.GetBspFile("data/baseq3", test.input)
-		if actual != test.expected {
-			t.Errorf("Expected %s got %v", test.expected, actual)
-		}
-	}
-}
-
-func TestGetMapFile(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{"test", ""},
-		{"testmap", "maps/testmap.map"},
-	}
-
-	for _, test := range tests {
-		actual := builder.GetMapFile("data/baseq3", test.input)
+		actual := builder.GetFile("data/baseq3", test.input)
 		if actual != test.expected {
 			t.Errorf("Expected %s got %v", test.expected, actual)
 		}
@@ -269,32 +224,6 @@ func TestGetExternalLightmaps(t *testing.T) {
 			if actual != test.expected[index] {
 				t.Errorf("Expected %s got %v", test.expected[index], actual)
 			}
-		}
-	}
-}
-
-func TestGetArenaFile(t *testing.T) {
-	expected := "scripts/testmap.arena"
-	actual := builder.GetArenaFile("data/baseq3", "testmap")
-	if actual != expected {
-		t.Errorf("Expected %s got %v", expected, actual)
-	}
-}
-
-func TestGetLevelshot(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{"testmap", "levelshots/testmap.jpg"},
-		{"testmap2", "levelshots/testmap2.tga"},
-		{"testmap3", ""},
-	}
-
-	for _, test := range tests {
-		actual := builder.GetLevelshot("data/baseq3", test.input)
-		if actual != test.expected {
-			t.Errorf("Expected %s got %v", test.expected, actual)
 		}
 	}
 }
